@@ -20,7 +20,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Quick settings** — bottom-right system bubble
   - Feature pods: Network (Wi-Fi), Bluetooth, Do Not Disturb, Night Light
   - Inline **Wi-Fi** (scan + connect), **Bluetooth** (connect / disconnect),
-    **Night Light** (colour-temperature slider) and **audio-output** picker
+    **Night Light** (colour-temperature slider, plus a **Sunset→sunrise
+    schedule** with adjustable times) and **audio-output** picker
     panels — tap a pod / the speaker button to expand
   - Brightness slider (`brightnessctl`) and volume slider (PipeWire)
   - Footer with date, battery status and Settings / Lock / Power buttons

@@ -398,6 +398,97 @@ PanelWindow {
                             onMoved: (v) => Nightlight.setTemp(
                                 Nightlight.minTemp + v * (Nightlight.maxTemp - Nightlight.minTemp))
                         }
+
+                        // Schedule mode
+                        Item {
+                            width: parent.width
+                            height: 28
+                            Text {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Schedule"
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontBody
+                            }
+                            Row {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: 4
+                                Repeater {
+                                    model: [ { id: "constant", label: "Off" },
+                                             { id: "schedule", label: "Sunset→sunrise" } ]
+                                    delegate: Rectangle {
+                                        required property var modelData
+                                        readonly property bool sel: Nightlight.mode === modelData.id
+                                        width: segTxt.implicitWidth + 18
+                                        height: 26
+                                        radius: Theme.radiusSmall
+                                        color: sel ? Theme.accent : Theme.surfaceHigh
+                                        Text {
+                                            id: segTxt
+                                            anchors.centerIn: parent
+                                            text: modelData.label
+                                            color: parent.sel ? Theme.textOnAccent : Theme.text
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSmall
+                                            font.weight: Font.Medium
+                                        }
+                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Nightlight.setMode(modelData.id) }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Sunset / Sunrise times (schedule mode only)
+                        Repeater {
+                            model: Nightlight.mode === "schedule"
+                                ? [ { label: "Sunset", time: Nightlight.sunset, kind: "sunset" },
+                                    { label: "Sunrise", time: Nightlight.sunrise, kind: "sunrise" } ]
+                                : []
+                            delegate: Item {
+                                required property var modelData
+                                width: nightCol.width
+                                height: 30
+                                Text {
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: modelData.label
+                                    color: Theme.textDim
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSmall
+                                }
+                                Row {
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 8
+                                    Rectangle {
+                                        width: 24; height: 24; radius: 12
+                                        color: decMa.containsMouse ? Theme.hover : Theme.surfaceHigh
+                                        MaterialIcon { anchors.centerIn: parent; icon: "remove"; size: 15; color: Theme.text }
+                                        MouseArea { id: decMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                            onClicked: modelData.kind === "sunset" ? Nightlight.shiftSunset(-30) : Nightlight.shiftSunrise(-30) }
+                                    }
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: 44
+                                        horizontalAlignment: Text.AlignHCenter
+                                        text: modelData.time
+                                        color: Theme.text
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontBody
+                                        font.weight: Font.Medium
+                                    }
+                                    Rectangle {
+                                        width: 24; height: 24; radius: 12
+                                        color: incMa.containsMouse ? Theme.hover : Theme.surfaceHigh
+                                        MaterialIcon { anchors.centerIn: parent; icon: "add"; size: 15; color: Theme.text }
+                                        MouseArea { id: incMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                            onClicked: modelData.kind === "sunset" ? Nightlight.shiftSunset(30) : Nightlight.shiftSunrise(30) }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 

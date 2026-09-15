@@ -19,6 +19,22 @@ Singleton {
     readonly property int maxTemp: 6500
     readonly property real fraction: (temp - minTemp) / (maxTemp - minTemp)
 
+    // "constant" holds `temp` all day; "schedule" ramps to `temp` at sunset and
+    // back to daylight at sunrise (via wlsunset's own scheduling).
+    property string mode: "constant"
+    property string sunrise: "06:30"
+    property string sunset: "18:30"
+
+    function setMode(m) { mode = m; _save(); if (active) _apply(); }
+    function _shift(t, deltaMin) {
+        const p = (t || "00:00").split(":");
+        let mins = ((parseInt(p[0]) || 0) * 60 + (parseInt(p[1]) || 0) + deltaMin + 1440) % 1440;
+        const h = Math.floor(mins / 60), m = mins % 60;
+        return (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m);
+    }
+    function shiftSunset(d)  { sunset = _shift(sunset, d);   _save(); if (active) _apply(); }
+    function shiftSunrise(d) { sunrise = _shift(sunrise, d); _save(); if (active) _apply(); }
+
     readonly property string statePath:
         (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state"))
         + "/quickshell-chrome/nightlight.json"
@@ -45,14 +61,27 @@ Singleton {
     // Force a constant temperature: day = K+1, night = K, with a 1-minute
     // "day" window so it stays at K nearly all the time.
     function _apply() {
-        Quickshell.execDetached(["sh", "-c",
-              "K=$1; pkill -x wlsunset 2>/dev/null; pkill -x gammastep 2>/dev/null; "
-            + "if command -v wlsunset >/dev/null 2>&1; then "
-            + "  wlsunset -T $((K+1)) -t $K -S 00:00 -s 00:01 >/dev/null 2>&1 & "
-            + "elif command -v gammastep >/dev/null 2>&1; then "
-            + "  gammastep -O $K >/dev/null 2>&1 & "
-            + "fi",
-            "sh", String(temp)]);
+        if (mode === "schedule") {
+            // Ramp to `temp` at sunset, back to daylight at sunrise.
+            Quickshell.execDetached(["sh", "-c",
+                  "K=$1; D=$2; SR=$3; SS=$4; pkill -x wlsunset 2>/dev/null; pkill -x gammastep 2>/dev/null; "
+                + "if command -v wlsunset >/dev/null 2>&1; then "
+                + "  wlsunset -T $D -t $K -S \"$SR\" -s \"$SS\" >/dev/null 2>&1 & "
+                + "elif command -v gammastep >/dev/null 2>&1; then "
+                + "  gammastep -O $K >/dev/null 2>&1 & "
+                + "fi",
+                "sh", String(temp), String(maxTemp), sunrise, sunset]);
+        } else {
+            // Constant: day = K+1, night = K, with a 1-minute "day" window.
+            Quickshell.execDetached(["sh", "-c",
+                  "K=$1; pkill -x wlsunset 2>/dev/null; pkill -x gammastep 2>/dev/null; "
+                + "if command -v wlsunset >/dev/null 2>&1; then "
+                + "  wlsunset -T $((K+1)) -t $K -S 00:00 -s 00:01 >/dev/null 2>&1 & "
+                + "elif command -v gammastep >/dev/null 2>&1; then "
+                + "  gammastep -O $K >/dev/null 2>&1 & "
+                + "fi",
+                "sh", String(temp)]);
+        }
         settle.restart();
     }
 
@@ -77,6 +106,9 @@ Singleton {
             try {
                 const o = JSON.parse(text() || "{}");
                 if (o.temp) root.temp = o.temp;
+                if (o.mode) root.mode = o.mode;
+                if (o.sunrise) root.sunrise = o.sunrise;
+                if (o.sunset) root.sunset = o.sunset;
             } catch (e) {}
         }
     }
@@ -84,7 +116,7 @@ Singleton {
     function _save() {
         saveProc.command = ["sh", "-c",
             "mkdir -p \"$(dirname \"$1\")\"; printf %s \"$2\" > \"$1\"",
-            "sh", root.statePath, JSON.stringify({ temp: root.temp })];
+            "sh", root.statePath, JSON.stringify({ temp: root.temp, mode: root.mode, sunrise: root.sunrise, sunset: root.sunset })];
         saveProc.running = true;
     }
 
