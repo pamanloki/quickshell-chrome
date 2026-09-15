@@ -67,6 +67,7 @@ PanelWindow {
     function launchOrFocus(appId) {
         const n = _norm(appId);
         if (isRunning(n)) { activateApp(n); return; }
+        Apps.record(appId);
         const entry = Apps.byId(appId);
         if (entry)
             entry.execute();
