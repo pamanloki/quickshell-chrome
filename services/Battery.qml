@@ -47,4 +47,24 @@ Singleton {
         if (percent <= 30) return Theme.warn;
         return Theme.text;
     }
+
+    // Low-battery notifications (once per threshold, reset when charging/recovered).
+    property int lowNotified: 0
+    onChargingChanged: if (charging) lowNotified = 0
+    onPercentChanged: {
+        if (!available || charging) { lowNotified = 0; return; }
+        if (percent > 20) {
+            lowNotified = 0;
+        } else if (percent <= 5 && lowNotified !== 5) {
+            _notifyLow("critical", "Battery critically low");
+            lowNotified = 5;
+        } else if (percent <= 15 && lowNotified === 0) {
+            _notifyLow("normal", "Battery low");
+            lowNotified = 15;
+        }
+    }
+    function _notifyLow(urgency, title) {
+        Quickshell.execDetached(["notify-send", "-u", urgency, "-i", "battery-caution",
+                                 title, percent + "% remaining"]);
+    }
 }

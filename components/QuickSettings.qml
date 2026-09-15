@@ -268,6 +268,14 @@ PanelWindow {
                         hasDetail: true
                         onDetail: ShellState.toggleSettings("theme")
                     }
+                    QsToggle {
+                        Layout.fillWidth: true
+                        icon: "local_cafe"
+                        title: "Caffeine"
+                        subtitle: Caffeine.active ? "Staying awake" : "Off"
+                        active: Caffeine.active
+                        onToggled: Caffeine.toggle()
+                    }
                 }
 
                 // ── Inline Wi-Fi list ───────────────────────────────────────

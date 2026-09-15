@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
 import "root:/config"
+import "root:/services"
 
 /**
  * ChromeOS "bubble launcher": a rounded surface above the launcher button with
@@ -54,6 +55,7 @@ PanelWindow {
     function launch(entry) {
         if (!entry) return;
         ShellState.closeAll();
+        Apps.record(entry.id);
         entry.execute();
     }
 
@@ -158,6 +160,63 @@ PanelWindow {
                                 visible: search.text.length === 0
                             }
                         }
+                    }
+                }
+
+                // Frequent apps (when not searching)
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: launcher.query.length === 0 && Apps.frequent(6).length > 0
+                    spacing: 8
+                    Text {
+                        text: "Frequent"
+                        color: Theme.textDim
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSmall
+                        font.weight: Font.Medium
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+                        Repeater {
+                            model: Apps.frequent(6)
+                            delegate: Item {
+                                required property var modelData
+                                implicitWidth: 100
+                                implicitHeight: 88
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: 2
+                                    radius: Theme.radius
+                                    color: "transparent"
+                                    Column {
+                                        anchors.centerIn: parent
+                                        spacing: 6
+                                        IconImage {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            width: 44; height: 44
+                                            source: Quickshell.iconPath(modelData.icon, "application-x-executable")
+                                            smooth: true
+                                        }
+                                        Text {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            width: 88
+                                            horizontalAlignment: Text.AlignHCenter
+                                            text: modelData.name || ""
+                                            color: Theme.text
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSmall
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                    StateLayer {
+                                        radius: parent.radius
+                                        onClicked: launcher.launch(modelData)
+                                    }
+                                }
+                            }
+                        }
+                        Item { Layout.fillWidth: true }
                     }
                 }
 
