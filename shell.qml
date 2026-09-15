@@ -14,6 +14,9 @@ import "components"
  * Run with:  qs -c chrome   (after linking this folder into ~/.config/quickshell)
  */
 ShellRoot {
+    // External control (keybinds): qs -c chrome ipc call shell launcher
+    Ipc {}
+
     Variants {
         model: Quickshell.screens
         Shelf {}
