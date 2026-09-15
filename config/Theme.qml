@@ -95,7 +95,7 @@ Singleton {
     readonly property var  easeEmphasized:  [0.05, 0.7, 0.1, 1.0, 1, 1]
 
     // ── Typography ───────────────────────────────────────────────────────────
-    readonly property string fontFamily: "Roboto"                    // UI text
+    readonly property string fontFamily: "Google Sans"               // UI text
     readonly property string iconFamily: "Material Symbols Rounded"  // icon glyphs
     readonly property int fontSmall:  13
     readonly property int fontBody:   15
