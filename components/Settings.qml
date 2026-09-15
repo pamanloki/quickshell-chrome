@@ -311,9 +311,9 @@ PanelWindow {
                                     Layout.fillWidth: true
                                     spacing: 0
                                     Text {
-                                        text: Updates.checking ? "Checking…"
+                                        text: (Updates.checking || !Updates.checked) ? "Checking for updates…"
                                             : Updates.count > 0 ? (Updates.count + " update" + (Updates.count > 1 ? "s" : "") + " available")
-                                            : "System is up to date"
+                                            : "Up to date"
                                         color: Theme.text
                                         font.family: Theme.fontFamily
                                         font.pixelSize: Theme.fontBody

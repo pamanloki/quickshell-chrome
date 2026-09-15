@@ -13,6 +13,7 @@ Singleton {
 
     property int count: 0
     property bool checking: false
+    property bool checked: false     // has a check completed at least once
 
     function refresh() {
         checking = true;
@@ -30,12 +31,14 @@ Singleton {
     Component.onCompleted: refresh()
     Timer { interval: 1800000; running: true; repeat: true; onTriggered: root.refresh() }  // 30 min
 
+    // Count only real update rows: xbps -n prints "<pkg-ver> update <arch> …"
+    // per package, so match the "update" action word rather than every line.
     Process {
         id: checkProc
-        command: ["sh", "-c", "xbps-install -Mun 2>/dev/null | grep -c . || echo 0"]
+        command: ["sh", "-c", "xbps-install -Mun 2>/dev/null | grep -cw update || echo 0"]
         stdout: StdioCollector {
             onStreamFinished: root.count = parseInt(text.trim()) || 0
         }
-        onExited: root.checking = false
+        onExited: { root.checking = false; root.checked = true; }
     }
 }
