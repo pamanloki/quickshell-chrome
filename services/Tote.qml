@@ -29,11 +29,18 @@ Singleton {
     function scheduleRefresh() { settle.restart(); }
     Timer { id: settle; interval: 500; repeat: false; onTriggered: root.refresh() }
 
+    // Screenshots only linger in the tote for a short while (like ChromeOS
+    // holding space), then the button disappears on its own.
+    readonly property int maxAgeMinutes: 5
+
     Process {
         id: lister
         command: ["sh", "-c",
-            "ls -t \"$1\"/*.png \"$1\"/*.jpg \"$1\"/*.jpeg 2>/dev/null | head -n 8",
-            "sh", root.dir]
+            "find \"$1\" -maxdepth 1 -type f "
+            + "\\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' \\) "
+            + "-mmin -\"$2\" -printf '%T@ %p\\n' 2>/dev/null "
+            + "| sort -rn | cut -d' ' -f2- | head -n 8",
+            "sh", root.dir, String(root.maxAgeMinutes)]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.recent = text.split("\n")
@@ -41,6 +48,15 @@ Singleton {
                     .filter(s => s.length > 0);
             }
         }
+    }
+
+    // While the tote has items, re-check every minute so entries drop out once
+    // they pass the age limit even if nothing else happens.
+    Timer {
+        running: root.recent.length > 0
+        interval: 60000
+        repeat: true
+        onTriggered: root.refresh()
     }
 
     function baseName(path) {

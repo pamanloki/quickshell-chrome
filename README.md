@@ -36,10 +36,13 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and
   live-reloads, so `flavours apply <scheme>` re-themes the shell instantly
 - **System tray** — StatusNotifierItem icons with real DBus menus
-- **Now Playing** — MPRIS media card (art, transport, seek) in quick settings
+- **Now Playing** — a standalone MPRIS media panel (art, transport, seek),
+  opened by a music glyph in the status area that only appears while a player
+  is present and vanishes when playback stops
 - **Screen capture** — pod with a right-click menu: region/full × clipboard/file
-- **Tote (holding space)** — a status-area tray that appears once you have
-  screenshots; open, copy, or delete recent captures straight from the shelf
+- **Tote (holding space)** — a status-area tray that appears after a capture
+  and clears itself a few minutes later; open, copy, or delete recent
+  screenshots straight from the shelf
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
@@ -167,6 +170,7 @@ components/
   QuickSettings.qml    # system bubble (pods, panels)
   NotificationCenter.qml   # standalone notification panel (status-area bell)
   TotePanel.qml        # holding-space popup (recent screenshots)
+  MusicPanel.qml       # standalone Now Playing popup (status-area glyph)
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   Toasts.qml           # notification toasts

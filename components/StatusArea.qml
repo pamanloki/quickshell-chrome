@@ -41,6 +41,31 @@ Item {
                 targetScreen: root.targetScreen
             }
 
+            // ── Music glyph → standalone Now Playing panel ─────────────────
+            // Only shown while a media player is present; gone when it stops.
+            Item {
+                Layout.alignment: Qt.AlignVCenter
+                visible: Player.has
+                implicitWidth: visible ? 24 : 0
+                implicitHeight: Theme.iconSize
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    icon: Player.playing ? "music_note" : "music_off"
+                    size: 18
+                    color: ShellState.musicOpen ? Theme.accent : Theme.text
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        ShellState.activeScreen = root.targetScreen;
+                        ShellState.toggleMusic();
+                    }
+                }
+            }
+
             // ── Tote (holding space) → recent screenshots ──────────────────
             Item {
                 Layout.alignment: Qt.AlignVCenter

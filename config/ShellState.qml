@@ -16,9 +16,11 @@ Singleton {
     property bool notificationsOpen: false
     property bool settingsOpen: false
     property bool toteOpen: false
+    property bool musicOpen: false
 
     readonly property bool anyOpen: launcherOpen || quickSettingsOpen || calendarOpen
-        || notificationsOpen || settingsOpen || toteOpen || dockMenuOpen || trayMenuOpen
+        || notificationsOpen || settingsOpen || toteOpen || musicOpen
+        || dockMenuOpen || trayMenuOpen
 
     // Dock right-click context menu.
     property bool dockMenuOpen: false
@@ -97,6 +99,12 @@ Singleton {
         toteOpen = next;
     }
 
+    function toggleMusic() {
+        const next = !musicOpen;
+        closeAll();
+        musicOpen = next;
+    }
+
     property string settingsSection: "wallpaper"
 
     function toggleSettings(sect) {
@@ -115,6 +123,7 @@ Singleton {
         notificationsOpen = false;
         settingsOpen = false;
         toteOpen = false;
+        musicOpen = false;
         dockMenuOpen = false;
         trayMenuOpen = false;
     }
