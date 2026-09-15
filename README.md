@@ -98,6 +98,29 @@ Dock* / *Remove from Dock*. The pinned list is persisted to
 Left-click launches a pinned app (or focuses it if already running); running
 apps that aren't pinned appear after a divider with a running dot.
 
+## IPC & keybinds
+
+Control the shell from keybinds via Quickshell IPC:
+
+```sh
+qs -c chrome ipc call shell launcher        # toggle the launcher
+qs -c chrome ipc call shell quickSettings   # toggle quick settings
+qs -c chrome ipc call shell notifications   # toggle the notification center
+qs -c chrome ipc call shell calendar        # toggle the calendar
+qs -c chrome ipc call shell close           # close all overlays
+qs -c chrome ipc call shell dnd             # toggle Do Not Disturb
+qs -c chrome ipc call shell nightLight      # toggle Night Light
+qs -c chrome ipc call audio up|down|mute|micMute
+qs -c chrome ipc call audio set 50          # volume %
+qs -c chrome ipc call brightness up|down
+qs -c chrome ipc call brightness set 50     # brightness %
+qs -c chrome ipc show                       # list every handler
+```
+
+A ready-made **niri** keybind block using these lives in
+[`niri/binds.kdl`](niri/binds.kdl) — copy it into `~/.config/niri/config.kdl`.
+Handlers are defined in `components/Ipc.qml`.
+
 ## Theming (Base16)
 
 `config/Theme.qml` loads a Base16 palette (`base00`–`base0F`) from a colors file
