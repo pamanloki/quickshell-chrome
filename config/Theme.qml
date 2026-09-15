@@ -94,10 +94,10 @@ Singleton {
     // ── Typography ───────────────────────────────────────────────────────────
     readonly property string fontFamily: "Roboto"                    // UI text
     readonly property string iconFamily: "Material Symbols Rounded"  // icon glyphs
-    readonly property int fontSmall:  12
-    readonly property int fontBody:   14
-    readonly property int fontTitle:  16
-    readonly property int fontLarge:  22
+    readonly property int fontSmall:  13
+    readonly property int fontBody:   15
+    readonly property int fontTitle:  18
+    readonly property int fontLarge:  24
 
     // ── Base16 loading ────────────────────────────────────────────────────────
     readonly property string colorsPath:

@@ -476,11 +476,7 @@ PanelWindow {
 
                     QsIconButton {
                         icon: "settings"
-                        onClicked: {
-                            ShellState.closeAll();
-                            Quickshell.execDetached(["sh", "-c",
-                                "XDG_CURRENT_DESKTOP= gnome-control-center || systemsettings || xfce4-settings-manager || true"]);
-                        }
+                        onClicked: ShellState.toggleSettings()
                     }
                     QsIconButton {
                         icon: "lock"

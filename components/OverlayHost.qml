@@ -38,4 +38,9 @@ Scope {
         active: ShellState.notificationsOpen && host.onThisScreen
         NotificationCenter { screen: host.modelData }
     }
+
+    LazyLoader {
+        active: ShellState.settingsOpen && host.onThisScreen
+        Settings { screen: host.modelData }
+    }
 }
