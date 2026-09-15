@@ -19,8 +19,12 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - Scrollable icon grid, `Enter` launches the top hit, `Esc` closes
 - **Quick settings** — bottom-right system bubble
   - Feature pods: Network (Wi-Fi), Bluetooth, Do Not Disturb, Night Light
+  - Inline **Wi-Fi** panel (scan + connect) and **Bluetooth** panel
+    (connect / disconnect) — tap a pod's chevron to expand
   - Brightness slider (`brightnessctl`) and volume slider (PipeWire)
   - Footer with date, battery status and Settings / Lock / Power buttons
+- **Base16 theming** — the whole palette is driven by a Base16 colors file and
+  live-reloads, so `flavours apply <scheme>` re-themes the shell instantly
 - Material 3 motion — ripples, state layers, spring pop-in animations
 - Multi-monitor aware — a shelf per screen; popups open on the active screen only
 
@@ -85,6 +89,16 @@ from Dock*. The list is persisted to
 `$XDG_STATE_HOME/quickshell-chrome/dock_pinned.json` and starts empty. Left-click
 launches a pinned app (or focuses it if already running); running apps that
 aren't pinned appear after a divider with a running dot.
+
+## Theming (Base16)
+
+`config/Theme.qml` loads a Base16 palette (`base00`–`base0F`) from a colors file
+and derives every semantic token from it, so switching schemes re-themes
+everything live. By default it reads `~/.config/waybar/colors.css` — the same
+file [Flavours](https://github.com/Misterio77/flavours) generates — matching
+lines like `@define-color base0D #7cafc2;`. Point it elsewhere with the
+`QUICKSHELL_BASE16` env var. If the file is missing, a built-in "Default Dark"
+palette is used. `base0D` is the accent (Chrome OS blue by default).
 
 ## Project layout
 

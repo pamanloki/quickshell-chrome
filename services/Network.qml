@@ -5,9 +5,9 @@ import Quickshell.Io
 import QtQuick
 
 /**
- * Network state derived from NetworkManager via `nmcli`. Polls periodically and
- * exposes a simple connection type / name / signal for the shelf & quick
- * settings. Toggling Wi-Fi shells out to `nmcli radio wifi on|off`.
+ * Network state via NetworkManager (`nmcli`). Exposes the active connection for
+ * the shelf/quick-settings and a scannable list of Wi-Fi networks for the
+ * inline Wi-Fi panel. Polls slowly; scans on demand.
  */
 Singleton {
     id: root
@@ -17,6 +17,10 @@ Singleton {
     property string name: ""
     property int signal: 0        // 0..100, wifi only
     property bool wifiEnabled: true
+    property bool scanning: false
+
+    // [{ ssid, signal, security, active }]
+    property var networks: []
 
     readonly property bool connected: type !== "disconnected"
 
@@ -37,8 +41,30 @@ Singleton {
         toggleProc.running = true;
     }
 
+    function scan() {
+        if (scanning)
+            return;
+        scanning = true;
+        scanProc.running = true;
+    }
+
+    function connect(ssid) {
+        if (!ssid)
+            return;
+        connProc.command = ["nmcli", "device", "wifi", "connect", ssid];
+        connProc.running = true;
+    }
+
+    function disconnect() {
+        // Bring the active wifi connection down.
+        Quickshell.execDetached(["sh", "-c",
+            "nmcli -t -f NAME,TYPE connection show --active | awk -F: '$2 ~ /wireless/ {print $1}' | while read n; do nmcli connection down \"$n\"; done"]);
+        root.refresh();
+    }
+
     function openSettings() {
-        Quickshell.execDetached(["nm-connection-editor"]);
+        Quickshell.execDetached(["sh", "-c",
+            "nm-connection-editor || gnome-control-center wifi || plasma-systemsettings kcm_networkmanagement || true"]);
     }
 
     Component.onCompleted: refresh()
@@ -48,7 +74,7 @@ Singleton {
     }
 
     Timer {
-        interval: 5000
+        interval: 10000
         running: true
         repeat: true
         onTriggered: root.refresh()
@@ -60,7 +86,7 @@ Singleton {
         command: ["nmcli", "-t", "-f", "TYPE,STATE,CONNECTION", "device", "status"]
         stdout: StdioCollector {
             onStreamFinished: {
-                let t = "disconnected", n = "", best = 0;
+                let t = "disconnected", n = "", sig = 0;
                 for (const line of text.trim().split("\n")) {
                     const f = line.split(":");
                     if (f.length < 3 || f[1] !== "connected")
@@ -72,11 +98,12 @@ Singleton {
                 root.name = n;
                 if (t === "wifi")
                     signalProc.running = true;
+                else
+                    root.signal = 0;
             }
         }
     }
 
-    // Signal strength of the active wifi AP
     Process {
         id: signalProc
         command: ["nmcli", "-t", "-f", "IN-USE,SIGNAL", "device", "wifi"]
@@ -100,8 +127,38 @@ Singleton {
         }
     }
 
+    // Wi-Fi list (SSID last so colons in field 4+ can be rejoined)
     Process {
-        id: toggleProc
-        onExited: root.refresh()
+        id: scanProc
+        command: ["nmcli", "-t", "-f", "IN-USE,SIGNAL,SECURITY,SSID", "device", "wifi", "list", "--rescan", "yes"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const out = [];
+                const seen = ({});
+                for (const line of text.trim().split("\n")) {
+                    if (!line)
+                        continue;
+                    const f = line.split(":");
+                    if (f.length < 4)
+                        continue;
+                    const ssid = f.slice(3).join(":").trim();
+                    if (!ssid || seen[ssid])
+                        continue;
+                    seen[ssid] = true;
+                    out.push({
+                        ssid: ssid,
+                        signal: parseInt(f[1]) || 0,
+                        security: f[2] || "",
+                        active: f[0] === "*"
+                    });
+                }
+                out.sort((a, b) => (b.active - a.active) || (b.signal - a.signal));
+                root.networks = out;
+            }
+        }
+        onExited: root.scanning = false
     }
+
+    Process { id: toggleProc; onExited: root.refresh() }
+    Process { id: connProc; onExited: root.refresh() }
 }

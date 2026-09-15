@@ -33,7 +33,7 @@ PanelWindow {
         border.color: Theme.outline
 
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: Theme.shelfHeight + Theme.gap
+        anchors.bottomMargin: Theme.gap
         x: Math.max(Theme.gap,
                     Math.min(ShellState.dockMenuX - width / 2,
                              parent.width - width - Theme.gap))

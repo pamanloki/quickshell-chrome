@@ -79,7 +79,7 @@ PanelWindow {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.leftMargin: Theme.gapLarge
-        anchors.bottomMargin: Theme.shelfHeight + Theme.gap
+        anchors.bottomMargin: Theme.gap
 
         onLoaded: item.focusSearch()
 

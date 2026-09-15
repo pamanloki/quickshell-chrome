@@ -6,9 +6,10 @@ import "root:/config"
 import "root:/services"
 
 /**
- * ChromeOS quick-settings bubble, anchored to the bottom-right above the status
- * area. Feature pods + brightness/volume sliders + a footer with the date and
- * system icon buttons. Backed by a full-screen scrim that closes on click/Esc.
+ * ChromeOS quick-settings bubble, anchored bottom-right just above the status
+ * area. Feature pods (with inline Wi-Fi / Bluetooth lists), brightness & volume
+ * sliders, and a footer with the date and system buttons. Created on demand by
+ * OverlayHost; a full-screen scrim closes it on click / Esc.
  */
 PanelWindow {
     id: qs
@@ -24,30 +25,27 @@ PanelWindow {
     // Local UI state
     property bool dnd: false
     property bool nightLight: false
+    property string expanded: ""   // "" | "wifi" | "bt"
 
-    // Scrim / click-away
-    MouseArea {
-        anchors.fill: parent
-        onPressed: ShellState.closeAll()
+    function toggleExpand(which) {
+        expanded = (expanded === which) ? "" : which;
+        if (expanded === "wifi") Network.scan();
+        else if (expanded === "bt") Bluetooth.scan();
     }
 
-    Item {
-        anchors.fill: parent
-        focus: true
-        Keys.onEscapePressed: ShellState.closeAll()
-    }
+    MouseArea { anchors.fill: parent; onPressed: ShellState.closeAll() }
+    Item { anchors.fill: parent; focus: true; Keys.onEscapePressed: ShellState.closeAll() }
 
-    // ── The bubble ──────────────────────────────────────────────────────────
     Loader {
         active: true
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: Theme.gapLarge
-        anchors.bottomMargin: Theme.shelfHeight + Theme.gap
+        anchors.bottomMargin: Theme.gap
 
         sourceComponent: Rectangle {
             id: bubble
-            width: 372
+            width: 380
             implicitHeight: layout.implicitHeight + 2 * Theme.gapLarge
             height: implicitHeight
             radius: Theme.radiusLarge
@@ -55,20 +53,21 @@ PanelWindow {
             border.width: 1
             border.color: Theme.outline
 
-            // Entrance animation
-            transformOrigin: Item.BottomRight
             Component.onCompleted: {
-                scale = 0.92; opacity = 0;
+                Network.refresh();
+                Bluetooth.refresh();
+                Brightness.refresh();
+                scale = 0.94; opacity = 0;
                 showAnim.start();
             }
+            transformOrigin: Item.BottomRight
             ParallelAnimation {
                 id: showAnim
                 NumberAnimation { target: bubble; property: "scale"; to: 1; duration: Theme.durNormal; easing.type: Easing.OutBack; easing.overshoot: 0.9 }
                 NumberAnimation { target: bubble; property: "opacity"; to: 1; duration: Theme.durNormal }
             }
 
-            // Block scrim clicks landing on the bubble
-            MouseArea { anchors.fill: parent }
+            MouseArea { anchors.fill: parent }   // swallow scrim clicks
 
             ColumnLayout {
                 id: layout
@@ -76,7 +75,7 @@ PanelWindow {
                 anchors.margins: Theme.gapLarge
                 spacing: Theme.gap
 
-                // Feature pods grid
+                // ── Feature pods ────────────────────────────────────────────
                 GridLayout {
                     Layout.fillWidth: true
                     columns: 2
@@ -88,11 +87,11 @@ PanelWindow {
                         icon: Network.icon
                         title: "Network"
                         subtitle: Network.connected ? (Network.name || "Connected")
-                                                    : (Network.wifiEnabled ? "Not connected" : "Off")
-                        active: Network.connected || Network.wifiEnabled
+                                                    : (Network.wifiEnabled ? "Not connected" : "Wi-Fi off")
+                        active: Network.connected
                         hasDetail: true
                         onToggled: Network.toggleWifi()
-                        onDetail: Network.openSettings()
+                        onDetail: qs.toggleExpand("wifi")
                     }
                     QsToggle {
                         Layout.fillWidth: true
@@ -103,7 +102,7 @@ PanelWindow {
                         active: Bluetooth.powered
                         hasDetail: true
                         onToggled: Bluetooth.toggle()
-                        onDetail: Bluetooth.openSettings()
+                        onDetail: qs.toggleExpand("bt")
                     }
                     QsToggle {
                         Layout.fillWidth: true
@@ -128,7 +127,164 @@ PanelWindow {
                     }
                 }
 
-                // Brightness
+                // ── Inline Wi-Fi list ───────────────────────────────────────
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: qs.expanded === "wifi"
+                    Layout.preferredHeight: visible ? Math.min(210, wifiList.contentHeight + 8) : 0
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    ListView {
+                        id: wifiList
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        model: Network.networks
+                        spacing: 2
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        header: Item {
+                            width: wifiList.width
+                            height: 26
+                            Text {
+                                anchors.left: parent.left; anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Network.scanning ? "Scanning…"
+                                                       : (wifiList.count === 0 ? "No networks" : "Wi-Fi networks")
+                                color: Theme.textDim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSmall
+                            }
+                        }
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: wifiList.width
+                            height: 40
+                            radius: Theme.radiusSmall
+                            color: wifiMa.containsMouse ? Theme.hover : "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                spacing: 8
+                                MaterialIcon {
+                                    icon: modelData.signal >= 60 ? "network_wifi"
+                                        : modelData.signal >= 30 ? "network_wifi_2_bar" : "network_wifi_1_bar"
+                                    size: 18
+                                    color: Theme.text
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.ssid
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    elide: Text.ElideRight
+                                }
+                                MaterialIcon {
+                                    icon: "lock"
+                                    size: 14
+                                    color: Theme.textFaint
+                                    visible: (modelData.security || "").length > 0 && modelData.security !== "--"
+                                }
+                                MaterialIcon {
+                                    icon: "check"
+                                    size: 18
+                                    color: Theme.accent
+                                    visible: modelData.active
+                                }
+                            }
+                            MouseArea {
+                                id: wifiMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Network.connect(modelData.ssid)
+                            }
+                        }
+                    }
+                }
+
+                // ── Inline Bluetooth list ───────────────────────────────────
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: qs.expanded === "bt"
+                    Layout.preferredHeight: visible ? Math.min(210, btList.contentHeight + 8) : 0
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    ListView {
+                        id: btList
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        model: Bluetooth.devices
+                        spacing: 2
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        header: Item {
+                            width: btList.width
+                            height: 26
+                            Text {
+                                anchors.left: parent.left; anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: !Bluetooth.powered ? "Bluetooth is off"
+                                    : Bluetooth.scanning ? "Scanning…"
+                                    : (btList.count === 0 ? "No devices" : "Devices")
+                                color: Theme.textDim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSmall
+                            }
+                        }
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: btList.width
+                            height: 40
+                            radius: Theme.radiusSmall
+                            color: btMa.containsMouse ? Theme.hover : "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                spacing: 8
+                                MaterialIcon {
+                                    icon: modelData.connected ? "bluetooth_connected" : "bluetooth"
+                                    size: 18
+                                    color: modelData.connected ? Theme.accent : Theme.text
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.name
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    text: modelData.connected ? "Connected" : ""
+                                    color: Theme.accent
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSmall
+                                }
+                            }
+                            MouseArea {
+                                id: btMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: modelData.connected ? Bluetooth.disconnect(modelData.mac)
+                                                               : Bluetooth.connect(modelData.mac)
+                            }
+                        }
+                    }
+                }
+
+                // ── Sliders ─────────────────────────────────────────────────
                 QsSlider {
                     Layout.fillWidth: true
                     Layout.topMargin: 4
@@ -137,8 +293,6 @@ PanelWindow {
                     value: Brightness.fraction
                     onMoved: (v) => Brightness.set(v)
                 }
-
-                // Volume
                 QsSlider {
                     Layout.fillWidth: true
                     icon: Audio.icon
@@ -148,7 +302,6 @@ PanelWindow {
                     onIconClicked: Audio.toggleMute()
                 }
 
-                // Divider
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: 4
@@ -156,7 +309,7 @@ PanelWindow {
                     color: Theme.outline
                 }
 
-                // Footer: date + system buttons
+                // ── Footer ──────────────────────────────────────────────────
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Theme.gap
@@ -182,7 +335,11 @@ PanelWindow {
 
                     QsIconButton {
                         icon: "settings"
-                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "gnome-control-center || xdg-open settings || systemsettings"]); }
+                        onClicked: {
+                            ShellState.closeAll();
+                            Quickshell.execDetached(["sh", "-c",
+                                "XDG_CURRENT_DESKTOP= gnome-control-center || systemsettings || xfce4-settings-manager || true"]);
+                        }
                     }
                     QsIconButton {
                         icon: "lock"
@@ -191,7 +348,7 @@ PanelWindow {
                     QsIconButton {
                         icon: "power_settings_new"
                         iconColor: Theme.bad
-                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl poweroff"]); }
+                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "wlogout || systemctl poweroff"]); }
                     }
                 }
             }

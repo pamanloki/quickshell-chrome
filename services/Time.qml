@@ -16,6 +16,8 @@ Singleton {
 
     SystemClock {
         id: clock
-        precision: SystemClock.Seconds
+        // Minute precision — nothing shows seconds, so this avoids a needless
+        // per-second wakeup/re-render across the shell.
+        precision: SystemClock.Minutes
     }
 }
