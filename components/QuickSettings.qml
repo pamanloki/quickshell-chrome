@@ -56,7 +56,6 @@ PanelWindow {
                 Network.refresh();
                 Bluetooth.refresh();
                 Brightness.refresh();
-                Notifications.markRead();
                 scale = 0.94; opacity = 0;
                 showAnim.start();
             }
@@ -74,113 +73,6 @@ PanelWindow {
                 anchors.fill: parent
                 anchors.margins: Theme.gapLarge
                 spacing: Theme.gap
-
-                // ── Notification center ─────────────────────────────────────
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    visible: Notifications.history.length > 0
-                    spacing: 4
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text {
-                            Layout.fillWidth: true
-                            text: "Notifications"
-                            color: Theme.textDim
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSmall
-                            font.weight: Font.Medium
-                        }
-                        Text {
-                            text: "Clear all"
-                            color: Theme.accent
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSmall
-                            MouseArea {
-                                anchors.fill: parent
-                                anchors.margins: -6
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: Notifications.clearHistory()
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(200, notifList.contentHeight + 8)
-                        radius: Theme.radius
-                        color: Theme.surface
-                        clip: true
-
-                        ListView {
-                            id: notifList
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            model: Notifications.history
-                            spacing: 4
-                            boundsBehavior: Flickable.StopAtBounds
-
-                            delegate: Rectangle {
-                                required property var modelData
-                                width: notifList.width
-                                implicitHeight: Math.max(46, ncol.implicitHeight + 12)
-                                radius: Theme.radiusSmall
-                                color: Theme.surfaceHigh
-
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 10
-                                    anchors.rightMargin: 6
-                                    anchors.topMargin: 6
-                                    anchors.bottomMargin: 6
-                                    spacing: 10
-
-                                    ColumnLayout {
-                                        id: ncol
-                                        Layout.fillWidth: true
-                                        Layout.alignment: Qt.AlignVCenter
-                                        spacing: 1
-                                        Text {
-                                            Layout.fillWidth: true
-                                            text: modelData.summary || modelData.appName
-                                            color: Theme.text
-                                            font.family: Theme.fontFamily
-                                            font.pixelSize: Theme.fontSmall
-                                            font.weight: Font.Medium
-                                            elide: Text.ElideRight
-                                        }
-                                        Text {
-                                            Layout.fillWidth: true
-                                            visible: (modelData.body || "").length > 0
-                                            text: modelData.body
-                                            color: Theme.textDim
-                                            font.family: Theme.fontFamily
-                                            font.pixelSize: Theme.fontSmall
-                                            wrapMode: Text.Wrap
-                                            maximumLineCount: 2
-                                            elide: Text.ElideRight
-                                            textFormat: Text.PlainText
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        Layout.alignment: Qt.AlignVCenter
-                                        width: 24; height: 24; radius: 12
-                                        color: nclose.containsMouse ? Theme.hover : "transparent"
-                                        MaterialIcon { anchors.centerIn: parent; icon: "close"; size: 16; color: Theme.textDim }
-                                        MouseArea {
-                                            id: nclose
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: Notifications.removeHistory(modelData.id)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
 
                 // ── Feature pods ────────────────────────────────────────────
                 GridLayout {

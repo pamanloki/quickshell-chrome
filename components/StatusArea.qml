@@ -19,7 +19,7 @@ Item {
         id: pill
         anchors.fill: parent
         radius: Theme.radiusPill
-        color: (ShellState.quickSettingsOpen || ShellState.calendarOpen) ? Theme.surfaceHigh : "transparent"
+        color: (ShellState.quickSettingsOpen || ShellState.calendarOpen || ShellState.notificationsOpen) ? Theme.surfaceHigh : "transparent"
         implicitWidth: content.implicitWidth + 24
 
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
@@ -28,6 +28,52 @@ Item {
             id: content
             anchors.centerIn: parent
             spacing: Theme.gap
+
+            // ── Notification bell → Notification Center ─────────────────────
+            Item {
+                Layout.alignment: Qt.AlignVCenter
+                implicitWidth: 24
+                implicitHeight: Theme.iconSize
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    icon: Notifications.doNotDisturb ? "notifications_off"
+                        : (Notifications.history.length > 0 ? "notifications" : "notifications_none")
+                    size: 18
+                    color: Theme.text
+                }
+
+                // unread count badge
+                Rectangle {
+                    visible: Notifications.unread > 0
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.topMargin: 4
+                    anchors.rightMargin: -2
+                    width: Math.max(14, badge.implicitWidth + 6)
+                    height: 14
+                    radius: 7
+                    color: Theme.bad
+                    Text {
+                        id: badge
+                        anchors.centerIn: parent
+                        text: Notifications.unread > 9 ? "9+" : Notifications.unread
+                        color: "#ffffff"
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 9
+                        font.weight: Font.Bold
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        ShellState.activeScreen = root.targetScreen;
+                        ShellState.toggleNotifications();
+                    }
+                }
+            }
 
             // ── Icons zone → Quick Settings ─────────────────────────────────
             Item {
@@ -63,16 +109,6 @@ Item {
                             font.weight: Font.Medium
                         }
                     }
-                }
-
-                // unread-notification dot
-                Rectangle {
-                    visible: Notifications.unread > 0
-                    width: 7; height: 7; radius: 3.5
-                    color: Theme.bad
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.topMargin: 6
                 }
 
                 MouseArea {

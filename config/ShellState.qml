@@ -13,6 +13,7 @@ Singleton {
     property bool launcherOpen: false
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
+    property bool notificationsOpen: false
 
     // Dock right-click context menu.
     property bool dockMenuOpen: false
@@ -66,10 +67,17 @@ Singleton {
         calendarOpen = next;
     }
 
+    function toggleNotifications() {
+        const next = !notificationsOpen;
+        closeAll();
+        notificationsOpen = next;
+    }
+
     function closeAll() {
         launcherOpen = false;
         quickSettingsOpen = false;
         calendarOpen = false;
+        notificationsOpen = false;
         dockMenuOpen = false;
     }
 }

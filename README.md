@@ -23,11 +23,11 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
     **Night Light** (colour-temperature slider) and **audio-output** picker
     panels — tap a pod / the speaker button to expand
   - Brightness slider (`brightnessctl`) and volume slider (PipeWire)
-  - Built-in **notification center** (history + clear) at the top
   - Footer with date, battery status and Settings / Lock / Power buttons
 - **Notifications** — a desktop notification server with ChromeOS-style toast
-  cards (bottom-right, auto-dismiss), an unread dot in the status area, and
-  Do-Not-Disturb
+  cards (bottom-right, auto-dismiss), a standalone **notification center**
+  panel (its own bubble, not merged into quick settings) opened by the
+  status-area bell with an unread count, and Do-Not-Disturb
 - **On-screen display** — a volume / brightness OSD pill that pops on change
 - **Calendar** — click the clock for a month view popup
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and
@@ -123,7 +123,8 @@ components/
   LauncherButton.qml StatusArea.qml ShelfApp.qml
   OverlayHost.qml      # lazily creates the on-demand overlays per screen
   Launcher.qml         # fullscreen app search
-  QuickSettings.qml    # system bubble (pods, panels, notifications)
+  QuickSettings.qml    # system bubble (pods, panels)
+  NotificationCenter.qml   # standalone notification panel (status-area bell)
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   Toasts.qml           # notification toasts

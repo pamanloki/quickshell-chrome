@@ -33,4 +33,9 @@ Scope {
         active: ShellState.calendarOpen && host.onThisScreen
         Calendar { screen: host.modelData }
     }
+
+    LazyLoader {
+        active: ShellState.notificationsOpen && host.onThisScreen
+        NotificationCenter { screen: host.modelData }
+    }
 }
