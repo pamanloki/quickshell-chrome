@@ -53,6 +53,9 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   or jump to the wallpaper / theme / settings panes
 - **Notification badges** — shelf app icons show a badge (dot or count) when
   that app has notifications; opening the app clears it
+- **Power menu** — the quick-settings power button opens Lock / Sleep / Sign
+  out / Restart / Power off, with confirmation on the destructive actions
+  (via `loginctl` — no systemd required)
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
 - Multi-monitor aware — a shelf per screen; popups open on the active screen only
 
@@ -80,7 +83,9 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
     `spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"` in niri
   - `swww` (or `swaybg`) — wallpaper setting
   - `flavours` — Base16 theme switching
-  - `loginctl` / `systemctl` — power actions (lock, sleep, restart, off)
+  - `loginctl` (elogind on Void — no systemd needed) — power actions; `zzz`
+    is used as a sleep fallback
+  - `swaylock` — screen lock (falls back to `loginctl lock-session`)
   - [`fyi`](https://codeberg.org/dnkl/fyi) — low-battery & screenshot notifications
   - `niri` — workspace indicator (auto-detected via `NIRI_SOCKET`)
   - PipeWire + WirePlumber — audio; any MPRIS player — Now Playing
@@ -142,6 +147,8 @@ qs -c chrome ipc call shell close           # close all overlays
 qs -c chrome ipc call shell dnd             # toggle Do Not Disturb
 qs -c chrome ipc call shell nightLight      # toggle Night Light
 qs -c chrome ipc call shell clipboard       # toggle clipboard history (cliphist)
+qs -c chrome ipc call shell power           # open the power menu
+qs -c chrome ipc call shell lock            # lock the screen (swaylock)
 qs -c chrome ipc call audio up|down|mute|micMute
 qs -c chrome ipc call audio set 50          # volume %
 qs -c chrome ipc call brightness up|down
@@ -187,6 +194,7 @@ components/
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   ShelfMenu.qml        # right-click empty shelf (autohide / wallpaper / settings)
+  PowerMenu.qml        # lock / sleep / sign out / restart / power off (confirmed)
   Toasts.qml           # notification toasts
   Osd.qml              # volume / brightness on-screen display
   QsToggle.qml QsSlider.qml QsIconButton.qml

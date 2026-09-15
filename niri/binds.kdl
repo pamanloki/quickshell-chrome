@@ -15,6 +15,9 @@ binds {
     // Clipboard history (ChromeOS uses Search+V; Mod+V is floating here, so Mod+;)
     // Needs cliphist + a watcher: spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"
     Mod+Semicolon { spawn-sh "qs -c chrome ipc call shell clipboard"; }
+    // Lock (needs swaylock) and the power menu (Lock / Sleep / Sign out / Restart / Off)
+    Ctrl+Alt+L    { spawn-sh "qs -c chrome ipc call shell lock"; }
+    Mod+Shift+Q   { spawn-sh "qs -c chrome ipc call shell power"; }
 
     // Base16 theme is driven by Flavours (~/.config/waybar/colors.css); the shell
     // re-themes live when you apply a scheme (random cycles through installed ones):

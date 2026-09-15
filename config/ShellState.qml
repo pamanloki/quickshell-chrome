@@ -18,10 +18,11 @@ Singleton {
     property bool toteOpen: false
     property bool musicOpen: false
     property bool clipboardOpen: false
+    property bool powerMenuOpen: false
 
     readonly property bool anyOpen: launcherOpen || quickSettingsOpen || calendarOpen
         || notificationsOpen || settingsOpen || toteOpen || musicOpen || clipboardOpen
-        || dockMenuOpen || trayMenuOpen || shelfMenuOpen
+        || powerMenuOpen || dockMenuOpen || trayMenuOpen || shelfMenuOpen
 
     // Right-click menu on empty shelf space.
     property bool shelfMenuOpen: false
@@ -123,6 +124,12 @@ Singleton {
         clipboardOpen = next;
     }
 
+    function togglePowerMenu() {
+        const next = !powerMenuOpen;
+        closeAll();
+        powerMenuOpen = next;
+    }
+
     property string settingsSection: "wallpaper"
 
     function toggleSettings(sect) {
@@ -143,6 +150,7 @@ Singleton {
         toteOpen = false;
         musicOpen = false;
         clipboardOpen = false;
+        powerMenuOpen = false;
         dockMenuOpen = false;
         trayMenuOpen = false;
         shelfMenuOpen = false;

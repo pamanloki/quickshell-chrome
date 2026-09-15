@@ -596,12 +596,12 @@ PanelWindow {
                     }
                     QsIconButton {
                         icon: "lock"
-                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); }
+                        onClicked: { ShellState.closeAll(); Power.lock(); }
                     }
                     QsIconButton {
                         icon: "power_settings_new"
                         iconColor: Theme.bad
-                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "wlogout || systemctl poweroff"]); }
+                        onClicked: ShellState.togglePowerMenu()
                     }
                 }
             }

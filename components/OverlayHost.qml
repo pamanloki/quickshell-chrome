@@ -60,6 +60,11 @@ Scope {
     }
 
     LazyLoader {
+        active: ShellState.powerMenuOpen && host.onThisScreen
+        PowerMenu { screen: host.modelData }
+    }
+
+    LazyLoader {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }

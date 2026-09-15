@@ -374,11 +374,11 @@ PanelWindow {
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 8
-                            PowerBtn { icon: "lock"; label: "Lock"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); } }
-                            PowerBtn { icon: "bedtime"; label: "Sleep"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl suspend || loginctl suspend"]); } }
-                            PowerBtn { icon: "logout"; label: "Sign out"; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl terminate-user \"$(id -un)\" || niri msg action quit -s"]); } }
-                            PowerBtn { icon: "restart_alt"; label: "Restart"; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl reboot || systemctl reboot"]); } }
-                            PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl poweroff || systemctl poweroff"]); } }
+                            PowerBtn { icon: "lock"; label: "Lock"; onClicked: { ShellState.closeAll(); Power.lock(); } }
+                            PowerBtn { icon: "bedtime"; label: "Sleep"; onClicked: { ShellState.closeAll(); Power.suspend(); } }
+                            PowerBtn { icon: "logout"; label: "Sign out"; confirm: true; onClicked: { ShellState.closeAll(); Power.logout(); } }
+                            PowerBtn { icon: "restart_alt"; label: "Restart"; confirm: true; onClicked: { ShellState.closeAll(); Power.reboot(); } }
+                            PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; confirm: true; onClicked: { ShellState.closeAll(); Power.poweroff(); } }
                         }
 
                         Item { Layout.fillHeight: true }
