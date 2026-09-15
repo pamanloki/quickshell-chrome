@@ -24,6 +24,7 @@ Singleton {
     }
     function focusUp() { Quickshell.execDetached(["niri", "msg", "action", "focus-workspace-up"]); }
     function focusDown() { Quickshell.execDetached(["niri", "msg", "action", "focus-workspace-down"]); }
+    function toggleOverview() { Quickshell.execDetached(["niri", "msg", "action", "toggle-overview"]); }
 
     function handleEvent(ev) {
         if (ev.WorkspacesChanged) {

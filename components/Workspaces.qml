@@ -10,12 +10,28 @@ import "root:/services"
 RowLayout {
     id: root
     spacing: 6
-    visible: Niri.onNiri && Niri.workspaces.length > 0
+    visible: Niri.onNiri
 
     // Scroll to switch workspace.
     WheelHandler {
         acceptedButtons: Qt.NoButton
         onWheel: (e) => { if (e.angleDelta.y > 0) Niri.focusUp(); else Niri.focusDown(); }
+    }
+
+    // Overview toggle.
+    Rectangle {
+        Layout.alignment: Qt.AlignVCenter
+        Layout.rightMargin: 2
+        width: 30; height: 30; radius: Theme.radiusSmall
+        color: ovMa.containsMouse ? Theme.hover : "transparent"
+        MaterialIcon { anchors.centerIn: parent; icon: "grid_view"; size: 18; color: Theme.text }
+        MouseArea {
+            id: ovMa
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: Niri.toggleOverview()
+        }
     }
 
     Repeater {
