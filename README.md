@@ -44,6 +44,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   and clears itself a few minutes later; open, copy, or delete recent
   screenshots straight from the shelf
 - **Frequent apps** — the launcher surfaces your most-used apps
+- **Launcher calculator & web search** — type a sum (`12*3+4`) for an instant
+  result you can copy, and get a "Search the web" row for any query
 - **Launcher context menu** — right-click any app to Open it or pin/unpin it
   to the shelf
 - **Clipboard history** — a ChromeOS-style Search+V popup (backed by

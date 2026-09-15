@@ -59,6 +59,70 @@ PanelWindow {
         entry.execute();
     }
 
+    // ── Calculator (safe recursive-descent arithmetic) ──────────────────────
+    readonly property var calcResult: _calc(query)
+
+    function _calc(expr) {
+        const s = (expr || "").trim();
+        if (!/^[-+*/%(). 0-9]+$/.test(s)) return null;
+        if (!/[-+*/%]/.test(s)) return null;   // needs at least one operator
+        let i = 0;
+        function ws() { while (i < s.length && s[i] === " ") i++; }
+        function factor() {
+            ws();
+            const c = s[i];
+            if (c === "+") { i++; return factor(); }
+            if (c === "-") { i++; return -factor(); }
+            if (c === "(") { i++; const v = expr2(); ws(); if (s[i] !== ")") throw 0; i++; return v; }
+            const start = i;
+            while (i < s.length && /[0-9.]/.test(s[i])) i++;
+            if (i === start) throw 0;
+            const n = parseFloat(s.slice(start, i));
+            if (isNaN(n)) throw 0;
+            return n;
+        }
+        function term() {
+            let v = factor();
+            for (;;) { ws();
+                const c = s[i];
+                if (c === "*") { i++; v *= factor(); }
+                else if (c === "/") { i++; v /= factor(); }
+                else if (c === "%") { i++; v %= factor(); }
+                else break;
+            }
+            return v;
+        }
+        function expr2() {
+            let v = term();
+            for (;;) { ws();
+                const c = s[i];
+                if (c === "+") { i++; v += term(); }
+                else if (c === "-") { i++; v -= term(); }
+                else break;
+            }
+            return v;
+        }
+        try {
+            const v = expr2();
+            ws();
+            if (i !== s.length || !isFinite(v)) return null;
+            return Math.round(v * 1e10) / 1e10;
+        } catch (e) { return null; }
+    }
+
+    // ── Web search fallback ─────────────────────────────────────────────────
+    function webSearch() {
+        const url = "https://www.google.com/search?q=" + encodeURIComponent(query.trim());
+        ShellState.closeAll();
+        Quickshell.execDetached(["sh", "-c",
+            "xdg-open \"$1\" 2>/dev/null || for b in firefox chromium chromium-browser "
+            + "brave google-chrome-stable qutebrowser epiphany; do "
+            + "command -v \"$b\" >/dev/null 2>&1 && exec \"$b\" \"$1\"; done",
+            "sh", url]);
+    }
+
+    function copyText(t) { Quickshell.execDetached(["sh", "-c", "printf %s \"$1\" | wl-copy", "sh", String(t)]); }
+
     // Scrim
     Rectangle {
         anchors.fill: parent
@@ -171,6 +235,8 @@ PanelWindow {
                             Keys.onReturnPressed: {
                                 const r = launcher.results();
                                 if (r.length > 0) launcher.launch(r[0]);
+                                else if (launcher.calcResult !== null) launcher.copyText(launcher.calcResult);
+                                else if (launcher.query.trim().length > 0) launcher.webSearch();
                             }
 
                             Text {
@@ -180,6 +246,91 @@ PanelWindow {
                                 font: search.font
                                 visible: search.text.length === 0
                             }
+                        }
+                    }
+                }
+
+                // Calculator result + web search (while searching)
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: launcher.query.trim().length > 0
+                    spacing: 8
+
+                    // Calculator result
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 56
+                        visible: launcher.calcResult !== null
+                        radius: Theme.radius
+                        color: Theme.surfaceBright
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
+                            spacing: 10
+                            MaterialIcon { icon: "calculate"; size: 24; color: Theme.accent }
+                            Text {
+                                Layout.fillWidth: true
+                                text: launcher.query.trim() + " = " + launcher.calcResult
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontTitle
+                                font.weight: Font.Bold
+                                elide: Text.ElideRight
+                            }
+                            Rectangle {
+                                Layout.preferredWidth: copyRow.implicitWidth + 20
+                                Layout.preferredHeight: 32
+                                radius: 16
+                                color: calcCopyMa.containsMouse ? Theme.hover : Theme.surfaceHigh
+                                Row {
+                                    id: copyRow
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    MaterialIcon { anchors.verticalCenter: parent.verticalCenter; icon: "content_copy"; size: 16; color: Theme.text }
+                                    Text { anchors.verticalCenter: parent.verticalCenter; text: "Copy"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall; font.weight: Font.Medium }
+                                }
+                                MouseArea {
+                                    id: calcCopyMa
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: { launcher.copyText(launcher.calcResult); ShellState.closeAll(); }
+                                }
+                            }
+                        }
+                    }
+
+                    // Search the web
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 48
+                        radius: Theme.radius
+                        color: webMa.containsMouse ? Theme.hover : Theme.surfaceBright
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
+                            spacing: 10
+                            MaterialIcon { icon: "travel_explore"; size: 22; color: Theme.textDim }
+                            Text {
+                                Layout.fillWidth: true
+                                text: "Search the web for “" + launcher.query.trim() + "”"
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontBody
+                                elide: Text.ElideRight
+                            }
+                            MaterialIcon { icon: "open_in_new"; size: 18; color: Theme.textDim }
+                        }
+                        MouseArea {
+                            id: webMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: launcher.webSearch()
                         }
                     }
                 }
