@@ -87,12 +87,18 @@ PanelWindow {
         }
     }
 
-    // Launcher — far left
-    LauncherButton {
+    // Launcher + workspaces — far left
+    RowLayout {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: Theme.gapLarge
-        targetScreen: shelf.modelData
+        spacing: Theme.gapLarge
+
+        LauncherButton {
+            Layout.alignment: Qt.AlignVCenter
+            targetScreen: shelf.modelData
+        }
+        Workspaces { Layout.alignment: Qt.AlignVCenter }
     }
 
     // Pinned + running apps — centered
