@@ -50,6 +50,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Launcher calculator & web search** — type a sum (`12*3+4`) for an instant
   result you can copy, and get a "Search the web" row for any query
+- **Emoji picker** — search or browse by category (`Mod+.`); clicking an emoji
+  copies it to the clipboard, with a persisted "Recent" list
 - **Launcher context menu** — right-click any app to Open it or pin/unpin it
   to the shelf
 - **Clipboard history** — a ChromeOS-style Search+V popup (backed by
@@ -88,6 +90,7 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - `wf-recorder` (+ `slurp`) — screen recording
   - `lm_sensors` — CPU package temperature (`Package id 0`); falls back to
     `/sys/class/thermal` if not installed
+  - `noto-fonts-emoji` (or any colour emoji font) — for the emoji picker
   - `cliphist` (+ `wl-clipboard`) — clipboard history; run a watcher, e.g.
     `spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"` in niri
   - `swww` (or `swaybg`) — wallpaper setting
@@ -161,6 +164,7 @@ qs -c chrome ipc call shell lock            # lock the screen (swaylock)
 qs -c chrome ipc call shell recordRegion    # record a region (wf-recorder)
 qs -c chrome ipc call shell recordScreen    # record the whole screen
 qs -c chrome ipc call shell recordStop      # stop recording
+qs -c chrome ipc call shell emoji           # toggle the emoji picker
 qs -c chrome ipc call audio up|down|mute|micMute
 qs -c chrome ipc call audio set 50          # volume %
 qs -c chrome ipc call brightness up|down
@@ -208,6 +212,7 @@ components/
   TotePanel.qml        # holding-space popup (recent screenshots)
   MusicPanel.qml       # standalone Now Playing popup (status-area glyph)
   ClipboardPanel.qml   # clipboard history popup (cliphist, Mod+;)
+  EmojiPanel.qml       # emoji picker (Mod+.) — copies to clipboard
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   ShelfMenu.qml        # right-click empty shelf (autohide / wallpaper / settings)

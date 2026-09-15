@@ -65,6 +65,11 @@ Scope {
     }
 
     LazyLoader {
+        active: ShellState.emojiOpen && host.onThisScreen
+        EmojiPanel { screen: host.modelData }
+    }
+
+    LazyLoader {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }

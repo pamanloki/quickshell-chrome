@@ -18,6 +18,8 @@ binds {
     // Lock (needs swaylock) and the power menu (Lock / Sleep / Sign out / Restart / Off)
     Ctrl+Alt+L    { spawn-sh "qs -c chrome ipc call shell lock"; }
     Mod+Shift+Q   { spawn-sh "qs -c chrome ipc call shell power"; }
+    // Emoji picker (copies the picked emoji to the clipboard)
+    Mod+Period    { spawn-sh "qs -c chrome ipc call shell emoji"; }
 
     // Base16 theme is driven by Flavours (~/.config/waybar/colors.css); the shell
     // re-themes live when you apply a scheme (random cycles through installed ones):

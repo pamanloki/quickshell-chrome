@@ -31,6 +31,7 @@ Scope {
         function clipboard(): void { ShellState.activeScreen = null; ShellState.toggleClipboard(); }
         function power(): void { ShellState.activeScreen = null; ShellState.togglePowerMenu(); }
         function lock(): void { ShellState.closeAll(); Power.lock(); }
+        function emoji(): void { ShellState.activeScreen = null; ShellState.toggleEmoji(); }
 
         function screenshot(): void { ShellState.closeAll(); Screenshot.capture("region-file"); }
         function screenshotFull(): void { ShellState.closeAll(); Screenshot.capture("full-file"); }
