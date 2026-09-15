@@ -43,4 +43,9 @@ Scope {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }
+
+    LazyLoader {
+        active: ShellState.trayMenuOpen && host.onThisScreen
+        TrayMenu { screen: host.modelData }
+    }
 }

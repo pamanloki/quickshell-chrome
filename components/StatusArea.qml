@@ -29,6 +29,12 @@ Item {
             anchors.centerIn: parent
             spacing: Theme.gap
 
+            // ── System tray ─────────────────────────────────────────────────
+            Tray {
+                Layout.alignment: Qt.AlignVCenter
+                targetScreen: root.targetScreen
+            }
+
             // ── Notification bell → Notification Center ─────────────────────
             Item {
                 Layout.alignment: Qt.AlignVCenter

@@ -22,6 +22,19 @@ Singleton {
     property string dockMenuAppId: ""
     property bool dockMenuPinned: false
 
+    // System-tray item menu.
+    property bool trayMenuOpen: false
+    property real trayMenuX: 0
+    property var trayMenuHandle: null
+
+    function openTrayMenu(handle, x, screen) {
+        closeAll();
+        trayMenuHandle = handle;
+        trayMenuX = x;
+        activeScreen = screen;
+        trayMenuOpen = true;
+    }
+
     // On-screen display (volume / brightness), independent of the overlays.
     property string osdKind: ""      // "volume" | "brightness"
     property int osdValue: 0         // 0..100
@@ -92,5 +105,6 @@ Singleton {
         notificationsOpen = false;
         settingsOpen = false;
         dockMenuOpen = false;
+        trayMenuOpen = false;
     }
 }
