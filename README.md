@@ -58,8 +58,9 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - A **wlroots**-based Wayland compositor (uses `wlr-layer-shell`)
 - Fonts (family names are set in `config/Theme.qml`; adjust if fontconfig lists
   them differently):
-  - **JetBrains Mono Nerd Font** — UI text (`fontFamily`). Verify with
-    `fc-list | grep -i jetbrains`.
+  - **Google Sans** — UI text (`fontFamily`), matching ChromeOS. Verify with
+    `fc-list | grep -i "google sans"`. Google Sans isn't in most repos; if you
+    don't have it, set `fontFamily` to `Roboto` (an open, near-identical match).
   - **Material Symbols Rounded** — icons (`iconFamily`). Install the *variable*
     font so filled icons work (`ttf-material-symbols-variable`, or the
     `MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf` from
@@ -186,8 +187,10 @@ components/
 
 ## Notes / troubleshooting
 
-- **Text shows as boxes / wrong font** → Roboto isn't installed, or is
-  registered under a different family name than `config/Theme.qml` expects.
+- **Text shows as boxes / wrong font** → the UI font isn't installed, or is
+  registered under a different family name than `config/Theme.qml` expects
+  (`fontFamily`, default `Google Sans` — set it to `Roboto` if you don't have
+  Google Sans).
 - **Icons show as boxes or the ligature text** → Material Symbols Rounded isn't
   installed (check `fc-list | grep -i "material symbols rounded"`).
 - **Icons never look filled** → install the *variable* Material Symbols font and
