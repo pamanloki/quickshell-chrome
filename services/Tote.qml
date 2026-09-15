@@ -48,9 +48,26 @@ Singleton {
         return i >= 0 ? path.slice(i + 1) : path;
     }
 
-    function open(path) { Quickshell.execDetached(["xdg-open", path]); }
+    // Open with the first available image viewer, then the system default,
+    // else notify — xdg-open often has no image handler on minimal setups.
+    function open(path) {
+        Quickshell.execDetached(["sh", "-c",
+            "for c in imv swayimg nsxiv feh eog gwenview qimgv xdg-open; do "
+            + "command -v \"$c\" >/dev/null 2>&1 && exec \"$c\" \"$1\"; done; "
+            + "fyi 'Tote' 'No image viewer found (try: xbps-install imv)'",
+            "sh", path]);
+    }
+
     function copy(path) { Quickshell.execDetached(["sh", "-c", "wl-copy < \"$1\"", "sh", path]); }
-    function reveal() { Quickshell.execDetached(["xdg-open", root.dir]); }
+
+    // Open the screenshots folder in a file manager, else the default handler.
+    function reveal() {
+        Quickshell.execDetached(["sh", "-c",
+            "for c in xdg-open nautilus thunar dolphin pcmanfm nemo; do "
+            + "command -v \"$c\" >/dev/null 2>&1 && exec \"$c\" \"$1\"; done; "
+            + "fyi 'Tote' 'No file manager found'",
+            "sh", root.dir]);
+    }
 
     Process {
         id: rmProc
