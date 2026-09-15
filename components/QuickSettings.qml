@@ -317,11 +317,27 @@ PanelWindow {
                                     font.pixelSize: Theme.fontBody
                                     elide: Text.ElideRight
                                 }
-                                Text {
-                                    text: modelData.connected ? "Connected" : ""
-                                    color: Theme.accent
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSmall
+                                Row {
+                                    spacing: 4
+                                    visible: modelData.connected
+                                    readonly property int batt: Bluetooth.batteryOf(modelData.mac)
+                                    MaterialIcon {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        visible: parent.batt >= 0
+                                        icon: parent.batt >= 80 ? "battery_full"
+                                            : parent.batt >= 55 ? "battery_5_bar"
+                                            : parent.batt >= 30 ? "battery_3_bar"
+                                            : parent.batt >= 10 ? "battery_2_bar" : "battery_alert"
+                                        size: 15
+                                        color: parent.batt <= 15 ? Theme.bad : Theme.accent
+                                    }
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: parent.batt >= 0 ? (parent.batt + "% · Connected") : "Connected"
+                                        color: Theme.accent
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSmall
+                                    }
                                 }
                             }
                             MouseArea {

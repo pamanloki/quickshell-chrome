@@ -85,6 +85,39 @@ Singleton {
         onExited: (code) => { if (code !== 0) root.available = false; }
     }
 
+    // Battery % per device mac (from `bluetoothctl info`), -1 if unknown.
+    property var batteryMap: ({})
+    function batteryOf(mac) {
+        const v = root.batteryMap[mac];
+        return (v === undefined) ? -1 : v;
+    }
+    function _queryBattery(macs) {
+        if (!macs || macs.length === 0) { root.batteryMap = ({}); return; }
+        batteryProc.command = ["sh", "-c",
+            "for m in \"$@\"; do "
+            + "p=$(bluetoothctl info \"$m\" 2>/dev/null | grep -m1 'Battery Percentage' "
+            + "| grep -oE '\\(([0-9]+)\\)' | tr -d '()'); "
+            + "printf '%s %s\\n' \"$m\" \"$p\"; done",
+            "sh"].concat(macs);
+        batteryProc.running = true;
+    }
+    Process {
+        id: batteryProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const map = ({});
+                for (const line of text.trim().split("\n")) {
+                    const parts = line.trim().split(/\s+/);
+                    if (parts.length >= 2) {
+                        const p = parseInt(parts[1]);
+                        if (!isNaN(p)) map[parts[0]] = p;
+                    }
+                }
+                root.batteryMap = map;
+            }
+        }
+    }
+
     // Merge the "all devices" and "connected" lists once both have arrived.
     property var knownDevices: []
     property var connectedSet: ({})
@@ -130,6 +163,7 @@ Singleton {
                 root.connectedName = first;
                 root.connectedSet = set;
                 root.combine();
+                root._queryBattery(Object.keys(set));
             }
         }
     }
