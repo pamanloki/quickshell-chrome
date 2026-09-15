@@ -41,6 +41,24 @@ Item {
                 targetScreen: root.targetScreen
             }
 
+            // ── Screen-recording indicator (click to stop) ─────────────────
+            Rectangle {
+                Layout.alignment: Qt.AlignVCenter
+                visible: Recording.recording
+                implicitWidth: visible ? recRow.implicitWidth + 16 : 0
+                implicitHeight: 26
+                radius: 13
+                color: Theme._a(Theme.bad, recMa.containsMouse ? 0.35 : 0.18)
+                Row {
+                    id: recRow
+                    anchors.centerIn: parent
+                    spacing: 5
+                    Rectangle { anchors.verticalCenter: parent.verticalCenter; width: 10; height: 10; radius: 5; color: Theme.bad }
+                    Text { anchors.verticalCenter: parent.verticalCenter; text: "Stop"; color: Theme.bad; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall; font.weight: Font.Bold }
+                }
+                MouseArea { id: recMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Recording.stop() }
+            }
+
             // ── Music glyph → standalone Now Playing panel ─────────────────
             // Only shown while a media player is present; gone when it stops.
             Item {

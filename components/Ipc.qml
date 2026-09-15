@@ -34,6 +34,10 @@ Scope {
 
         function screenshot(): void { ShellState.closeAll(); Screenshot.capture("region-file"); }
         function screenshotFull(): void { ShellState.closeAll(); Screenshot.capture("full-file"); }
+
+        function recordRegion(): void { ShellState.closeAll(); Recording.start(true); }
+        function recordScreen(): void { ShellState.closeAll(); Recording.start(false); }
+        function recordStop(): void { Recording.stop(); }
     }
 
     // Audio

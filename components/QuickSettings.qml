@@ -679,6 +679,58 @@ PanelWindow {
                         }
                     }
                 }
+
+                // Divider between screenshot and recording
+                Rectangle {
+                    width: capCol.width - 8
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    height: 1
+                    color: Theme.outline
+                }
+
+                // Screen recording (wf-recorder)
+                Repeater {
+                    model: Recording.recording
+                        ? [ { id: "stop", label: "Stop recording", icon: "stop_circle" } ]
+                        : [ { id: "rec-region", label: "Record region", icon: "screen_record" },
+                            { id: "rec-full", label: "Record screen", icon: "smart_display" } ]
+                    delegate: Rectangle {
+                        required property var modelData
+                        readonly property bool stopRow: modelData.id === "stop"
+                        width: capCol.width
+                        height: 38
+                        radius: Theme.radiusSmall
+                        color: recRowMa.containsMouse ? Theme.hover : "transparent"
+
+                        MaterialIcon {
+                            id: recRowIcon
+                            anchors.left: parent.left; anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            icon: modelData.icon; size: 18
+                            color: parent.stopRow ? Theme.bad : Theme.text
+                        }
+                        Text {
+                            anchors.left: recRowIcon.right; anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.label
+                            color: parent.stopRow ? Theme.bad : Theme.text
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontBody
+                        }
+                        MouseArea {
+                            id: recRowMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                qs.captureMenuOpen = false;
+                                ShellState.closeAll();
+                                if (modelData.id === "stop") Recording.stop();
+                                else Recording.start(modelData.id === "rec-region");
+                            }
+                        }
+                    }
+                }
             }
         }
     }

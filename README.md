@@ -42,6 +42,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   opened by a music glyph in the status area that only appears while a player
   is present and vanishes when playback stops
 - **Screen capture** — pod with a right-click menu: region/full × clipboard/file
+- **Screen recording** — record a region or the whole screen (wf-recorder) from
+  the capture menu; a red "Stop" indicator sits in the status area while active
 - **Tote (holding space)** — a status-area tray that appears after a capture
   and clears itself a few minutes later; open, copy, or delete recent
   screenshots straight from the shelf
@@ -83,6 +85,7 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - `bluetoothctl` (BlueZ) — bluetooth status, device list & toggle
   - `wlsunset` (or `gammastep`) — Night Light
   - `grim` + `slurp` + `wl-clipboard` — screen capture
+  - `wf-recorder` (+ `slurp`) — screen recording
   - `cliphist` (+ `wl-clipboard`) — clipboard history; run a watcher, e.g.
     `spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"` in niri
   - `swww` (or `swaybg`) — wallpaper setting
@@ -153,6 +156,9 @@ qs -c chrome ipc call shell nightLight      # toggle Night Light
 qs -c chrome ipc call shell clipboard       # toggle clipboard history (cliphist)
 qs -c chrome ipc call shell power           # open the power menu
 qs -c chrome ipc call shell lock            # lock the screen (swaylock)
+qs -c chrome ipc call shell recordRegion    # record a region (wf-recorder)
+qs -c chrome ipc call shell recordScreen    # record the whole screen
+qs -c chrome ipc call shell recordStop      # stop recording
 qs -c chrome ipc call audio up|down|mute|micMute
 qs -c chrome ipc call audio set 50          # volume %
 qs -c chrome ipc call brightness up|down
