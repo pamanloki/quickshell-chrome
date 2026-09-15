@@ -17,6 +17,23 @@ Singleton {
     readonly property real volume: sink?.audio?.volume ?? 0
     readonly property bool muted: sink?.audio?.muted ?? false
 
+    // All output devices (for the audio-output picker).
+    readonly property var sinks: {
+        const ns = Pipewire.nodes?.values ?? [];
+        const out = [];
+        for (const n of ns)
+            if (n && n.isSink && !n.isStream)
+                out.push(n);
+        return out;
+    }
+    function nodeLabel(n) {
+        return n ? (n.description || n.nickname || n.name || "Output") : "";
+    }
+    function setDefaultSink(node) {
+        if (node)
+            Pipewire.preferredDefaultAudioSink = node;
+    }
+
     readonly property real micVolume: source?.audio?.volume ?? 0
     readonly property bool micMuted: source?.audio?.muted ?? true
 
@@ -51,5 +68,9 @@ Singleton {
     // Keep the default sink / source alive & tracked so their audio binds work.
     PwObjectTracker {
         objects: [root.sink, root.source]
+    }
+    // Track all output devices so their labels are available in the picker.
+    PwObjectTracker {
+        objects: root.sinks
     }
 }

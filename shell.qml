@@ -19,9 +19,19 @@ ShellRoot {
         Shelf {}
     }
 
-    // Launcher + quick settings, created on demand per screen.
+    // Launcher + quick settings + calendar, created on demand per screen.
     Variants {
         model: Quickshell.screens
         OverlayHost {}
+    }
+
+    // Always-present transient surfaces.
+    Variants {
+        model: Quickshell.screens
+        Toasts {}
+    }
+    Variants {
+        model: Quickshell.screens
+        Osd {}
     }
 }

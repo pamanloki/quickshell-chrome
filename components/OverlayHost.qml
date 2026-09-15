@@ -28,4 +28,9 @@ Scope {
         active: ShellState.dockMenuOpen && host.onThisScreen
         DockMenu { screen: host.modelData }
     }
+
+    LazyLoader {
+        active: ShellState.calendarOpen && host.onThisScreen
+        Calendar { screen: host.modelData }
+    }
 }

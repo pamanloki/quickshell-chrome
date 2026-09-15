@@ -19,11 +19,17 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - Scrollable icon grid, `Enter` launches the top hit, `Esc` closes
 - **Quick settings** — bottom-right system bubble
   - Feature pods: Network (Wi-Fi), Bluetooth, Do Not Disturb, Night Light
-  - Inline **Wi-Fi** (scan + connect), **Bluetooth** (connect / disconnect) and
-    **Night Light** (colour-temperature slider) panels — tap a pod's chevron to
-    expand
+  - Inline **Wi-Fi** (scan + connect), **Bluetooth** (connect / disconnect),
+    **Night Light** (colour-temperature slider) and **audio-output** picker
+    panels — tap a pod / the speaker button to expand
   - Brightness slider (`brightnessctl`) and volume slider (PipeWire)
+  - Built-in **notification center** (history + clear) at the top
   - Footer with date, battery status and Settings / Lock / Power buttons
+- **Notifications** — a desktop notification server with ChromeOS-style toast
+  cards (bottom-right, auto-dismiss), an unread dot in the status area, and
+  Do-Not-Disturb
+- **On-screen display** — a volume / brightness OSD pill that pops on change
+- **Calendar** — click the clock for a month view popup
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and
   live-reloads, so `flavours apply <scheme>` re-themes the shell instantly
 - Material 3 motion — ripples, state layers, spring pop-in animations
@@ -110,14 +116,18 @@ config/
   ShellState.qml       # shared UI state (which overlay is open, dock menu)
 services/
   Time.qml Audio.qml Battery.qml Brightness.qml
-  Network.qml Bluetooth.qml Apps.qml DockConfig.qml   # persisted pinned apps
+  Network.qml Bluetooth.qml Nightlight.qml Notifications.qml
+  Apps.qml DockConfig.qml            # persisted pinned apps
 components/
   Shelf.qml            # the bottom bar
   LauncherButton.qml StatusArea.qml ShelfApp.qml
   OverlayHost.qml      # lazily creates the on-demand overlays per screen
   Launcher.qml         # fullscreen app search
-  QuickSettings.qml    # system bubble
+  QuickSettings.qml    # system bubble (pods, panels, notifications)
+  Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
+  Toasts.qml           # notification toasts
+  Osd.qml              # volume / brightness on-screen display
   QsToggle.qml QsSlider.qml QsIconButton.qml
   MaterialIcon.qml StateLayer.qml   # primitives
 ```

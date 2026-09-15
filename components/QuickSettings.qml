@@ -23,8 +23,7 @@ PanelWindow {
     color: "transparent"
 
     // Local UI state
-    property bool dnd: false
-    property string expanded: ""   // "" | "wifi" | "bt" | "night"
+    property string expanded: ""   // "" | "wifi" | "bt" | "night" | "audio"
 
     function toggleExpand(which) {
         expanded = (expanded === which) ? "" : which;
@@ -57,6 +56,7 @@ PanelWindow {
                 Network.refresh();
                 Bluetooth.refresh();
                 Brightness.refresh();
+                Notifications.markRead();
                 scale = 0.94; opacity = 0;
                 showAnim.start();
             }
@@ -74,6 +74,113 @@ PanelWindow {
                 anchors.fill: parent
                 anchors.margins: Theme.gapLarge
                 spacing: Theme.gap
+
+                // ── Notification center ─────────────────────────────────────
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: Notifications.history.length > 0
+                    spacing: 4
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Notifications"
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                            font.weight: Font.Medium
+                        }
+                        Text {
+                            text: "Clear all"
+                            color: Theme.accent
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                            MouseArea {
+                                anchors.fill: parent
+                                anchors.margins: -6
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Notifications.clearHistory()
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Math.min(200, notifList.contentHeight + 8)
+                        radius: Theme.radius
+                        color: Theme.surface
+                        clip: true
+
+                        ListView {
+                            id: notifList
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            model: Notifications.history
+                            spacing: 4
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                width: notifList.width
+                                implicitHeight: Math.max(46, ncol.implicitHeight + 12)
+                                radius: Theme.radiusSmall
+                                color: Theme.surfaceHigh
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 10
+                                    anchors.rightMargin: 6
+                                    anchors.topMargin: 6
+                                    anchors.bottomMargin: 6
+                                    spacing: 10
+
+                                    ColumnLayout {
+                                        id: ncol
+                                        Layout.fillWidth: true
+                                        Layout.alignment: Qt.AlignVCenter
+                                        spacing: 1
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: modelData.summary || modelData.appName
+                                            color: Theme.text
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSmall
+                                            font.weight: Font.Medium
+                                            elide: Text.ElideRight
+                                        }
+                                        Text {
+                                            Layout.fillWidth: true
+                                            visible: (modelData.body || "").length > 0
+                                            text: modelData.body
+                                            color: Theme.textDim
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSmall
+                                            wrapMode: Text.Wrap
+                                            maximumLineCount: 2
+                                            elide: Text.ElideRight
+                                            textFormat: Text.PlainText
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.alignment: Qt.AlignVCenter
+                                        width: 24; height: 24; radius: 12
+                                        color: nclose.containsMouse ? Theme.hover : "transparent"
+                                        MaterialIcon { anchors.centerIn: parent; icon: "close"; size: 16; color: Theme.textDim }
+                                        MouseArea {
+                                            id: nclose
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: Notifications.removeHistory(modelData.id)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // ── Feature pods ────────────────────────────────────────────
                 GridLayout {
@@ -106,11 +213,11 @@ PanelWindow {
                     }
                     QsToggle {
                         Layout.fillWidth: true
-                        icon: qs.dnd ? "do_not_disturb_on" : "notifications"
+                        icon: Notifications.doNotDisturb ? "do_not_disturb_on" : "notifications"
                         title: "Do not disturb"
-                        subtitle: qs.dnd ? "On" : "Off"
-                        active: qs.dnd
-                        onToggled: qs.dnd = !qs.dnd
+                        subtitle: Notifications.doNotDisturb ? "On" : "Off"
+                        active: Notifications.doNotDisturb
+                        onToggled: Notifications.doNotDisturb = !Notifications.doNotDisturb
                     }
                     QsToggle {
                         Layout.fillWidth: true
@@ -339,13 +446,109 @@ PanelWindow {
                     value: Brightness.fraction
                     onMoved: (v) => Brightness.set(v)
                 }
-                QsSlider {
+                RowLayout {
                     Layout.fillWidth: true
-                    icon: Audio.icon
-                    iconClickable: true
-                    value: Audio.volume
-                    onMoved: (v) => Audio.setVolume(v)
-                    onIconClicked: Audio.toggleMute()
+                    spacing: Theme.gap
+                    QsSlider {
+                        Layout.fillWidth: true
+                        icon: Audio.icon
+                        iconClickable: true
+                        value: Audio.volume
+                        onMoved: (v) => Audio.setVolume(v)
+                        onIconClicked: Audio.toggleMute()
+                    }
+                    Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        width: 40; height: 40; radius: 20
+                        color: qs.expanded === "audio" ? Theme.accent
+                             : (audioBtn.containsMouse ? Theme.hover : Theme.surfaceHigh)
+                        MaterialIcon {
+                            anchors.centerIn: parent
+                            icon: "speaker"
+                            size: 20
+                            color: qs.expanded === "audio" ? Theme.textOnAccent : Theme.text
+                        }
+                        MouseArea {
+                            id: audioBtn
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: qs.toggleExpand("audio")
+                        }
+                    }
+                }
+
+                // Inline audio-output picker
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: qs.expanded === "audio"
+                    Layout.preferredHeight: visible ? Math.min(180, sinkList.contentHeight + 8) : 0
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    ListView {
+                        id: sinkList
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        model: Audio.sinks
+                        spacing: 2
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        header: Item {
+                            width: sinkList.width; height: 26
+                            Text {
+                                anchors.left: parent.left; anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Output device"
+                                color: Theme.textDim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSmall
+                            }
+                        }
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            readonly property bool isDefault: Audio.sink === modelData
+                            width: sinkList.width
+                            height: 38
+                            radius: Theme.radiusSmall
+                            color: sinkMa.containsMouse ? Theme.hover : "transparent"
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                spacing: 8
+                                MaterialIcon {
+                                    icon: "speaker"
+                                    size: 18
+                                    color: parent.parent.isDefault ? Theme.accent : Theme.text
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: Audio.nodeLabel(modelData)
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    elide: Text.ElideRight
+                                }
+                                MaterialIcon {
+                                    icon: "check"
+                                    size: 18
+                                    color: Theme.accent
+                                    visible: parent.parent.isDefault
+                                }
+                            }
+                            MouseArea {
+                                id: sinkMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: Audio.setDefaultSink(modelData)
+                            }
+                        }
+                    }
                 }
 
                 Rectangle {

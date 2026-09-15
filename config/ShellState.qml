@@ -20,6 +20,21 @@ Singleton {
     property string dockMenuAppId: ""
     property bool dockMenuPinned: false
 
+    // On-screen display (volume / brightness), independent of the overlays.
+    property string osdKind: ""      // "volume" | "brightness"
+    property int osdValue: 0         // 0..100
+    property bool osdMuted: false
+    property bool osdVisible: false
+
+    function showOsd(kind, value, muted) {
+        osdKind = kind;
+        osdValue = value;
+        osdMuted = muted || false;
+        osdVisible = true;
+        osdTimer.restart();
+    }
+    Timer { id: osdTimer; interval: 1600; onTriggered: root.osdVisible = false }
+
     // Which screen the pointer / interaction last happened on. Used so popups
     // and the launcher show up on the active monitor only.
     property var activeScreen: null
