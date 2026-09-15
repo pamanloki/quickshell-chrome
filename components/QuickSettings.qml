@@ -108,10 +108,6 @@ PanelWindow {
                             font.pixelSize: Theme.fontSmall
                         }
                     }
-                    QsIconButton {
-                        icon: "settings"
-                        onClicked: ShellState.toggleSettings()
-                    }
                 }
 
                 // ── Feature pods ────────────────────────────────────────────
