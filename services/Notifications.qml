@@ -24,6 +24,7 @@ Singleton {
         const entry = {
             id: ++root._seq,
             appName: n.appName || "Notification",
+            desktopEntry: n.desktopEntry || "",
             summary: n.summary || "",
             body: n.body || "",
             appIcon: n.appIcon || "",
@@ -41,6 +42,35 @@ Singleton {
     function clearHistory() { root.history = []; root.unread = 0; }
     function removeHistory(id) { root.history = root.history.filter(e => e.id !== id); }
     function markRead() { root.unread = 0; }
+
+    // ── Per-app badges (shelf icons) ────────────────────────────────────────
+    function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+    function _matches(e, idNorm, nameNorm) {
+        const de = _norm(e.desktopEntry);
+        const an = _norm(e.appName);
+        return (de && (de === idNorm || de === nameNorm))
+            || (an && (an === idNorm || an === nameNorm));
+    }
+
+    // How many notifications in history belong to a given app.
+    function countFor(idNorm, nameNorm) {
+        let c = 0;
+        for (const e of root.history)
+            if (_matches(e, idNorm, nameNorm))
+                c++;
+        return c;
+    }
+
+    // Drop an app's notifications (e.g. when its window is opened / focused).
+    function clearFor(idNorm, nameNorm) {
+        const keep = root.history.filter(e => !_matches(e, idNorm, nameNorm));
+        const removed = root.history.length - keep.length;
+        if (removed <= 0)
+            return;
+        root.history = keep;
+        root.unread = Math.max(0, root.unread - removed);
+    }
 
     NotificationServer {
         id: server

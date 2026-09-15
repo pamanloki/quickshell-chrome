@@ -51,6 +51,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Shelf context menu** — right-click empty shelf space to toggle auto-hide
   or jump to the wallpaper / theme / settings panes
+- **Notification badges** — shelf app icons show a badge (dot or count) when
+  that app has notifications; opening the app clears it
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
 - Multi-monitor aware — a shelf per screen; popups open on the active screen only
 

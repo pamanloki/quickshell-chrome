@@ -24,6 +24,11 @@ Item {
     readonly property string appName: entry?.name ?? appData?.name ?? appData?.id ?? "App"
     readonly property string iconName: entry?.icon ?? appData?.icon ?? "application-x-executable"
 
+    function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+    readonly property string _idNorm: _norm(appData?.id)
+    readonly property string _nameNorm: _norm(appName)
+    readonly property int notifCount: Notifications.countFor(_idNorm, _nameNorm)
+
     implicitWidth: Theme.iconSize + 8
     implicitHeight: Theme.iconSize + 8
 
@@ -48,7 +53,10 @@ Item {
         StateLayer {
             radius: pill.radius
             enableRipple: false
-            onClicked: root.activated()
+            onClicked: {
+                Notifications.clearFor(root._idNorm, root._nameNorm);
+                root.activated();
+            }
         }
 
         // Right click → context menu (Add/Remove from Dock).
@@ -69,6 +77,31 @@ Item {
         radius: 1.5
         visible: root.running
         color: root.focused ? Theme.accent : Theme.textDim
+    }
+
+    // Notification badge (top-right of the icon).
+    Rectangle {
+        visible: root.notifCount > 0
+        anchors.right: pill.right
+        anchors.top: pill.top
+        anchors.rightMargin: 4
+        anchors.topMargin: 4
+        width: root.notifCount > 1 ? Math.max(16, badgeText.implicitWidth + 8) : 12
+        height: 12
+        radius: 6
+        color: Theme.bad
+        border.width: 2
+        border.color: Theme.shelf
+        Text {
+            id: badgeText
+            anchors.centerIn: parent
+            visible: root.notifCount > 1
+            text: root.notifCount > 9 ? "9+" : root.notifCount
+            color: "#ffffff"
+            font.family: Theme.fontFamily
+            font.pixelSize: 8
+            font.weight: Font.Bold
+        }
     }
 
     // Tooltip
