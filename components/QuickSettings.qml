@@ -74,6 +74,46 @@ PanelWindow {
                 anchors.margins: Theme.gapLarge
                 spacing: Theme.gap
 
+                // ── User header ─────────────────────────────────────────────
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 2
+                    spacing: 10
+                    Rectangle {
+                        width: 40; height: 40; radius: 20
+                        color: Theme.accent
+                        Text {
+                            anchors.centerIn: parent
+                            text: (Quickshell.env("USER") || "?").charAt(0).toUpperCase()
+                            color: Theme.textOnAccent
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontTitle
+                            font.weight: Font.Bold
+                        }
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+                        Text {
+                            text: Quickshell.env("USER") || "User"
+                            color: Theme.text
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontBody
+                            font.weight: Font.Bold
+                        }
+                        Text {
+                            text: "Signed in"
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                        }
+                    }
+                    QsIconButton {
+                        icon: "settings"
+                        onClicked: ShellState.toggleSettings()
+                    }
+                }
+
                 // ── Feature pods ────────────────────────────────────────────
                 GridLayout {
                     Layout.fillWidth: true
@@ -120,6 +160,22 @@ PanelWindow {
                         hasDetail: true
                         onToggled: Nightlight.toggle()
                         onDetail: qs.toggleExpand("night")
+                    }
+                    QsToggle {
+                        Layout.fillWidth: true
+                        icon: "screenshot_region"
+                        title: "Screen capture"
+                        subtitle: "Select region"
+                        onToggled: { ShellState.closeAll(); Screenshot.region(); }
+                    }
+                    QsToggle {
+                        Layout.fillWidth: true
+                        icon: "dark_mode"
+                        title: "Theme"
+                        subtitle: Flavours.mode === "light" ? "Light" : "Dark"
+                        onToggled: Flavours.toggleMode()
+                        hasDetail: true
+                        onDetail: ShellState.toggleSettings()
                     }
                 }
 

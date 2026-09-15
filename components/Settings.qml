@@ -340,8 +340,9 @@ PanelWindow {
                             spacing: 8
                             PowerBtn { icon: "lock"; label: "Lock"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); } }
                             PowerBtn { icon: "bedtime"; label: "Sleep"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl suspend || loginctl suspend"]); } }
-                            PowerBtn { icon: "restart_alt"; label: "Restart"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl reboot || systemctl reboot"]); } }
-                            PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl poweroff || systemctl poweroff"]); } }
+                            PowerBtn { icon: "logout"; label: "Sign out"; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl terminate-user \"$(id -un)\" || niri msg action quit -s"]); } }
+                            PowerBtn { icon: "restart_alt"; label: "Restart"; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl reboot || systemctl reboot"]); } }
+                            PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; confirm: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl poweroff || systemctl poweroff"]); } }
                         }
 
                         Item { Layout.fillHeight: true }
@@ -457,17 +458,40 @@ PanelWindow {
         property string icon: ""
         property string label: ""
         property bool danger: false
+        property bool confirm: false   // require a second click
+        property bool armed: false
         signal clicked()
         Layout.fillWidth: true
         implicitHeight: 62
         radius: Theme.radius
-        color: powMa.containsMouse ? Theme.hover : Theme.surfaceBright
+        color: armed ? Theme.bad : (powMa.containsMouse ? Theme.hover : Theme.surfaceBright)
         Column {
             anchors.centerIn: parent
             spacing: 4
-            MaterialIcon { anchors.horizontalCenter: parent.horizontalCenter; icon: pb.icon; size: 22; color: pb.danger ? Theme.bad : Theme.text }
-            Text { anchors.horizontalCenter: parent.horizontalCenter; text: pb.label; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall }
+            MaterialIcon {
+                anchors.horizontalCenter: parent.horizontalCenter
+                icon: pb.icon; size: 22
+                color: pb.armed ? "#ffffff" : (pb.danger ? Theme.bad : Theme.text)
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: pb.armed ? "Confirm?" : pb.label
+                color: pb.armed ? "#ffffff" : Theme.textDim
+                font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall
+                font.weight: pb.armed ? Font.Bold : Font.Normal
+            }
         }
-        MouseArea { id: powMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: pb.clicked() }
+        Timer { id: disarm; interval: 3000; onTriggered: pb.armed = false }
+        MouseArea {
+            id: powMa
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (pb.confirm && !pb.armed) { pb.armed = true; disarm.restart(); return; }
+                pb.armed = false;
+                pb.clicked();
+            }
+        }
     }
 }
