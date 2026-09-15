@@ -79,7 +79,7 @@ PanelWindow {
                         color: Theme.text
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontTitle
-                        font.weight: Font.Medium
+                        font.weight: Font.Bold
                     }
                     NavBtn { icon: "chevron_left"; onClicked: cal.shift(-1) }
                     NavBtn { icon: "today"; onClicked: cal.today() }

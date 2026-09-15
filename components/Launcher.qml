@@ -138,6 +138,7 @@ PanelWindow {
                             color: Theme.text
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontTitle
+                            font.weight: Font.Medium
                             clip: true
                             selectByMouse: true
                             selectionColor: Theme.accent
