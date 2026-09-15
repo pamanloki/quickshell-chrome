@@ -184,6 +184,7 @@ PanelWindow {
 
                         RowLayout {
                             Layout.fillWidth: true
+                            Layout.rightMargin: 40   // clear the close (X) button
                             Text { Layout.fillWidth: true; text: "Theme"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
                             // light / dark switch
                             Rectangle {
