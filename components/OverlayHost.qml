@@ -40,6 +40,11 @@ Scope {
     }
 
     LazyLoader {
+        active: ShellState.toteOpen && host.onThisScreen
+        TotePanel { screen: host.modelData }
+    }
+
+    LazyLoader {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }

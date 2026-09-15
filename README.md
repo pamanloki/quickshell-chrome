@@ -38,6 +38,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **System tray** — StatusNotifierItem icons with real DBus menus
 - **Now Playing** — MPRIS media card (art, transport, seek) in quick settings
 - **Screen capture** — pod with a right-click menu: region/full × clipboard/file
+- **Tote (holding space)** — a status-area tray that appears once you have
+  screenshots; open, copy, or delete recent captures straight from the shelf
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
@@ -164,6 +166,7 @@ components/
   Launcher.qml         # fullscreen app search
   QuickSettings.qml    # system bubble (pods, panels)
   NotificationCenter.qml   # standalone notification panel (status-area bell)
+  TotePanel.qml        # holding-space popup (recent screenshots)
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   Toasts.qml           # notification toasts
@@ -174,7 +177,7 @@ components/
 
 ## Notes / troubleshooting
 
-- **Text shows as boxes** → JetBrains Mono Nerd Font isn't installed, or is
+- **Text shows as boxes / wrong font** → Roboto isn't installed, or is
   registered under a different family name than `config/Theme.qml` expects.
 - **Icons show as boxes or the ligature text** → Material Symbols Rounded isn't
   installed (check `fc-list | grep -i "material symbols rounded"`).

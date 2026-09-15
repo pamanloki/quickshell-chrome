@@ -41,6 +41,31 @@ Item {
                 targetScreen: root.targetScreen
             }
 
+            // ── Tote (holding space) → recent screenshots ──────────────────
+            Item {
+                Layout.alignment: Qt.AlignVCenter
+                visible: Tote.hasItems
+                implicitWidth: visible ? 24 : 0
+                implicitHeight: Theme.iconSize
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    icon: "photo_library"
+                    size: 18
+                    color: ShellState.toteOpen ? Theme.accent : Theme.text
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        ShellState.activeScreen = root.targetScreen;
+                        Tote.refresh();
+                        ShellState.toggleTote();
+                    }
+                }
+            }
+
             // ── Notification bell → Notification Center ─────────────────────
             Item {
                 Layout.alignment: Qt.AlignVCenter

@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import QtQuick
+import "root:/services"
 
 /**
  * Screenshots via grim (+ slurp for region). Four modes — region/full ×
@@ -54,6 +55,8 @@ Singleton {
             inner = "f=\"$d/shot-$(date +%Y%m%d-%H%M%S).png\"; grim " + geom + " \"$f\" && "
                   + "{ command -v wl-copy >/dev/null 2>&1 && wl-copy < \"$f\"; fyi -i \"$f\" 'Screenshot' \"Saved to $f\"; }";
         Quickshell.execDetached(["sh", "-c", "d=\"$1\"; mkdir -p \"$d\"; sleep 0.2; " + inner, "sh", root.dir]);
+        if (!clip)
+            Tote.scheduleRefresh();
     }
 
     // Pick a mode and capture with it right away.
