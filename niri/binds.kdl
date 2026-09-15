@@ -12,6 +12,9 @@ binds {
     Mod+C       { spawn-sh "qs -c chrome ipc call shell calendar"; }
     Mod+Shift+N { spawn-sh "qs -c chrome ipc call shell dnd"; }
     Mod+Shift+I { spawn-sh "qs -c chrome ipc call shell nightLight"; }
+    // Clipboard history (ChromeOS uses Search+V; Mod+V is floating here, so Mod+;)
+    // Needs cliphist + a watcher: spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"
+    Mod+Semicolon { spawn-sh "qs -c chrome ipc call shell clipboard"; }
 
     // Base16 theme is driven by Flavours (~/.config/waybar/colors.css); the shell
     // re-themes live when you apply a scheme (random cycles through installed ones):

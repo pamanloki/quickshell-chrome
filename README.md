@@ -46,6 +46,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Launcher context menu** — right-click any app to Open it or pin/unpin it
   to the shelf
+- **Clipboard history** — a ChromeOS-style Search+V popup (backed by
+  `cliphist`); click a clip to copy it back, or clear individual entries
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Shelf context menu** — right-click empty shelf space to toggle auto-hide
   or jump to the wallpaper / theme / settings panes
@@ -72,6 +74,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - `bluetoothctl` (BlueZ) — bluetooth status, device list & toggle
   - `wlsunset` (or `gammastep`) — Night Light
   - `grim` + `slurp` + `wl-clipboard` — screen capture
+  - `cliphist` (+ `wl-clipboard`) — clipboard history; run a watcher, e.g.
+    `spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"` in niri
   - `swww` (or `swaybg`) — wallpaper setting
   - `flavours` — Base16 theme switching
   - `loginctl` / `systemctl` — power actions (lock, sleep, restart, off)
@@ -135,6 +139,7 @@ qs -c chrome ipc call shell calendar        # toggle the calendar
 qs -c chrome ipc call shell close           # close all overlays
 qs -c chrome ipc call shell dnd             # toggle Do Not Disturb
 qs -c chrome ipc call shell nightLight      # toggle Night Light
+qs -c chrome ipc call shell clipboard       # toggle clipboard history (cliphist)
 qs -c chrome ipc call audio up|down|mute|micMute
 qs -c chrome ipc call audio set 50          # volume %
 qs -c chrome ipc call brightness up|down
@@ -176,6 +181,7 @@ components/
   NotificationCenter.qml   # standalone notification panel (status-area bell)
   TotePanel.qml        # holding-space popup (recent screenshots)
   MusicPanel.qml       # standalone Now Playing popup (status-area glyph)
+  ClipboardPanel.qml   # clipboard history popup (cliphist, Mod+;)
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
   ShelfMenu.qml        # right-click empty shelf (autohide / wallpaper / settings)

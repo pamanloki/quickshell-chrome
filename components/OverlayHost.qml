@@ -55,6 +55,11 @@ Scope {
     }
 
     LazyLoader {
+        active: ShellState.clipboardOpen && host.onThisScreen
+        ClipboardPanel { screen: host.modelData }
+    }
+
+    LazyLoader {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }

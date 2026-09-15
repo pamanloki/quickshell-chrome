@@ -28,9 +28,10 @@ Scope {
         function dnd(): void { Notifications.doNotDisturb = !Notifications.doNotDisturb; }
         function nightLight(): void { Nightlight.toggle(); }
         function settings(): void { ShellState.activeScreen = null; ShellState.toggleSettings(); }
+        function clipboard(): void { ShellState.activeScreen = null; ShellState.toggleClipboard(); }
 
-        function screenshot(): void { ShellState.closeAll(); Screenshot.region(); }
-        function screenshotFull(): void { ShellState.closeAll(); Screenshot.full(); }
+        function screenshot(): void { ShellState.closeAll(); Screenshot.capture("region-file"); }
+        function screenshotFull(): void { ShellState.closeAll(); Screenshot.capture("full-file"); }
     }
 
     // Audio
