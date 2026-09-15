@@ -45,7 +45,7 @@ PanelWindow {
                 id: toast
                 required property var modelData        // Notification
                 width: col.width
-                implicitHeight: Math.max(64, row.implicitHeight + 20)
+                implicitHeight: mainCol.implicitHeight + 20
                 radius: Theme.radius
                 color: Theme.surfaceGlass
                 border.width: 1
@@ -67,13 +67,18 @@ PanelWindow {
                     onTriggered: toast.modelData.dismiss()
                 }
 
-                RowLayout {
-                    id: row
+                ColumnLayout {
+                    id: mainCol
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 14
                     anchors.rightMargin: 10
+                    spacing: 8
+
+                    RowLayout {
+                    id: row
+                    Layout.fillWidth: true
                     spacing: 12
 
                     IconImage {
@@ -129,6 +134,41 @@ PanelWindow {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: toast.modelData.dismiss()
+                        }
+                    }
+                    }
+
+                    // Action buttons
+                    Flow {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 46
+                        spacing: 6
+                        visible: (toast.modelData.actions ? toast.modelData.actions.length : 0) > 0
+                        Repeater {
+                            model: toast.modelData.actions
+                            delegate: Rectangle {
+                                required property var modelData
+                                implicitWidth: aTxt.implicitWidth + 22
+                                height: 30
+                                radius: 15
+                                color: aMa.containsMouse ? Theme.surfaceHigh : Theme.surface
+                                Text {
+                                    id: aTxt
+                                    anchors.centerIn: parent
+                                    text: modelData.text
+                                    color: Theme.accent
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSmall
+                                    font.weight: Font.Medium
+                                }
+                                MouseArea {
+                                    id: aMa
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: { modelData.invoke(); toast.modelData.dismiss(); }
+                                }
+                            }
                         }
                     }
                 }
