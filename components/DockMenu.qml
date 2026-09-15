@@ -169,6 +169,20 @@ PanelWindow {
                 onTriggered: menu.newWindow()
             }
 
+            // Reorder (pinned only) — keeps the menu open
+            MenuItem {
+                icon: "chevron_left"
+                label: "Move left"
+                visible: ShellState.dockMenuPinned
+                onTriggered: DockConfig.move(menu.appId, -1)
+            }
+            MenuItem {
+                icon: "chevron_right"
+                label: "Move right"
+                visible: ShellState.dockMenuPinned
+                onTriggered: DockConfig.move(menu.appId, 1)
+            }
+
             // Add / Remove from Dock
             MenuItem {
                 icon: ShellState.dockMenuPinned ? "keep_off" : "keep"

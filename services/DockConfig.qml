@@ -40,6 +40,22 @@ Singleton {
         _save();
     }
 
+    // Shift a pinned app by delta positions (drag-free reordering).
+    function move(appId, delta) {
+        const n = _norm(appId);
+        const a = root.pinned.slice();
+        const i = a.findIndex(p => _norm(p) === n);
+        if (i < 0)
+            return;
+        const j = Math.max(0, Math.min(a.length - 1, i + delta));
+        if (j === i)
+            return;
+        const it = a.splice(i, 1)[0];
+        a.splice(j, 0, it);
+        root.pinned = a;
+        _save();
+    }
+
     FileView {
         id: file
         path: root.path
