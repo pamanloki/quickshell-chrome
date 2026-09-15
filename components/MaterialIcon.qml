@@ -2,25 +2,30 @@ import QtQuick
 import "root:/config"
 
 /**
- * A single icon glyph rendered from JetBrains Mono Nerd Font. `icon` is a
- * semantic name (e.g. "settings", "wifi") resolved to a Nerd Font glyph via the
- * Icons map; passing a literal glyph works too. `fill`/`grade`/`weight` are
- * kept for call-site compatibility (Nerd Font glyphs are not variable-axis).
+ * A single Material Symbols Rounded glyph. `icon` is the ligature name, e.g.
+ * "settings", "wifi", "battery_full". `fill` (0/1) toggles the filled variant
+ * via the variable font's FILL axis (needs Qt 6.7+).
  */
 Text {
     id: root
 
     property string icon: ""
     property int size: 22
-    property int fill: 0
+    property int fill: 0        // 0 = outline, 1 = filled
     property int grade: 0
     property int weight: 400
 
-    text: Icons.glyph(icon)
+    text: icon
     color: Theme.text
     font.family: Theme.iconFamily
     font.pixelSize: size
     font.weight: weight
+    font.variableAxes: ({
+        "FILL": fill,
+        "GRAD": grade,
+        "opsz": Math.max(20, Math.min(48, size)),
+        "wght": weight
+    })
 
     verticalAlignment: Text.AlignVCenter
     horizontalAlignment: Text.AlignHCenter

@@ -28,12 +28,15 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 
 - **Quickshell** (recent build) running on Qt **6.7+**
 - A **wlroots**-based Wayland compositor (uses `wlr-layer-shell`)
-- Font: **JetBrains Mono Nerd Font** — provides both the UI text *and* the icon
-  glyphs (icons use the Font Awesome glyph block bundled in every Nerd Font).
-  Install via your distro's `ttf-jetbrains-mono-nerd` package or from
-  [nerdfonts.com](https://www.nerdfonts.com/), then `fc-cache -f`. Verify with
-  `fc-list | grep -i jetbrains`. The family name is set in `config/Theme.qml`
-  (`fontFamily` / `iconFamily`); adjust it if fontconfig lists it differently.
+- Fonts (family names are set in `config/Theme.qml`; adjust if fontconfig lists
+  them differently):
+  - **JetBrains Mono Nerd Font** — UI text (`fontFamily`). Verify with
+    `fc-list | grep -i jetbrains`.
+  - **Material Symbols Rounded** — icons (`iconFamily`). Install the *variable*
+    font so filled icons work (`ttf-material-symbols-variable`, or the
+    `MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf` from
+    [fonts.google.com/icons](https://fonts.google.com/icons)), then `fc-cache -f`.
+    Filled icons use the `FILL` axis, which needs Qt **6.7+**.
 - Optional CLI tools (each feature degrades gracefully if missing):
   - `brightnessctl` — brightness slider
   - `nmcli` (NetworkManager) — network status & Wi-Fi toggle
@@ -90,7 +93,6 @@ entry is a `.desktop` id (filename without `.desktop`); optional `exec` / `icon`
 shell.qml              # entry point — spawns a Shelf/QuickSettings/Launcher per screen
 config/
   Theme.qml            # design tokens (Material 3 / Chrome OS palette)
-  Icons.qml            # semantic icon name -> Nerd Font glyph map
   State.qml            # shared UI state (which overlay is open)
   Pinned.qml           # shelf app list
 services/
@@ -107,9 +109,12 @@ components/
 
 ## Notes / troubleshooting
 
-- **Icons/text show as boxes** → JetBrains Mono Nerd Font isn't installed, or
-  fontconfig registers it under a different family name than `config/Theme.qml`
-  expects (check `fc-list | grep -i jetbrains`).
+- **Text shows as boxes** → JetBrains Mono Nerd Font isn't installed, or is
+  registered under a different family name than `config/Theme.qml` expects.
+- **Icons show as boxes or the ligature text** → Material Symbols Rounded isn't
+  installed (check `fc-list | grep -i "material symbols rounded"`).
+- **Icons never look filled** → install the *variable* Material Symbols font and
+  make sure Qt is 6.7+ (the `FILL` axis needs `font.variableAxes`).
 - **Every icon is a blank tile** in the launcher → your icon theme is missing;
   set one with your DE tools or install e.g. `papirus-icon-theme`.
 - **Nothing appears** → make sure your compositor supports `wlr-layer-shell`
