@@ -39,11 +39,22 @@ Singleton {
             "sh", path, root.statePath]);
     }
 
+    // Resolve the current flavours theme's wallpaper folder from
+    // ~/.config/flavours/walls.map ("<theme> <folder>" per line); fall back to
+    // the default dir when there's no map entry.
     Process {
         id: listProc
         command: ["sh", "-c",
-            "d=\"$1\"; [ -d \"$d\" ] && find \"$d\" -maxdepth 2 -type f "
-          + "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort",
+              "fallback=\"$1\"; "
+            + "theme=$(flavours current 2>/dev/null | head -1); "
+            + "map=\"${XDG_CONFIG_HOME:-$HOME/.config}/flavours/walls.map\"; "
+            + "folder=\"\"; "
+            + "[ -f \"$map\" ] && [ -n \"$theme\" ] && while read -r k v; do "
+            + "  [ \"$k\" = \"$theme\" ] && { folder=\"$v\"; break; }; done < \"$map\"; "
+            + "case \"$folder\" in \"~\"*) folder=\"$HOME${folder#~}\";; esac; "
+            + "[ -z \"$folder\" ] && folder=\"$fallback\"; "
+            + "[ -d \"$folder\" ] && find \"$folder\" -maxdepth 2 -type f "
+            + "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) | sort",
             "sh", root.dir]
         stdout: StdioCollector {
             onStreamFinished: root.walls = text.trim().split("\n").filter(x => x.length > 0)

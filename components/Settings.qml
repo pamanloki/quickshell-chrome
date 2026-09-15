@@ -6,9 +6,10 @@ import "root:/config"
 import "root:/services"
 
 /**
- * ChromeOS-style Settings window: a centered panel with a left category rail
- * and a right content pane (Personalization / Device / About) — not one long
- * scroll. Opened from the quick-settings gear; scrim / Esc closes.
+ * ChromeOS-style Settings window: centered, with a left category rail
+ * (Wallpaper / Theme / Device / About) and a right content pane. Wallpaper and
+ * Theme mirror quickshellku's logic — a 3-column wallpaper grid, and a
+ * searchable family list with a light/dark switch.
  */
 PanelWindow {
     id: win
@@ -21,9 +22,15 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
 
-    property string section: "personalization"
+    property string section: "wallpaper"
+    property string themeQuery: ""
+    readonly property var filteredFamilies: {
+        const q = themeQuery.toLowerCase().trim();
+        if (!q) return Flavours.families;
+        return Flavours.families.filter(s => s.toLowerCase().indexOf(q) !== -1);
+    }
+    function fileUrl(p) { return "file://" + (p || "").replace(/ /g, "%20"); }
 
-    // dim backdrop like a real settings window
     Rectangle { anchors.fill: parent; color: Theme.overlayScrim }
     MouseArea { anchors.fill: parent; onPressed: ShellState.closeAll() }
     Item { anchors.fill: parent; focus: true; Keys.onEscapePressed: ShellState.closeAll() }
@@ -35,8 +42,8 @@ PanelWindow {
 
         sourceComponent: Rectangle {
             id: bubble
-            width: Math.min(780, win.width - 80)
-            height: Math.min(540, win.height - 120)
+            width: Math.min(800, win.width - 80)
+            height: Math.min(560, win.height - 120)
             radius: Theme.radiusLarge
             color: Theme.surface
             border.width: 1
@@ -77,7 +84,8 @@ PanelWindow {
                             font.weight: Font.Bold
                         }
 
-                        NavItem { icon: "brush"; label: "Personalization"; sect: "personalization" }
+                        NavItem { icon: "wallpaper"; label: "Wallpaper"; sect: "wallpaper" }
+                        NavItem { icon: "palette"; label: "Theme"; sect: "theme" }
                         NavItem { icon: "tune"; label: "Device"; sect: "device" }
                         NavItem { icon: "info"; label: "About"; sect: "about" }
 
@@ -89,207 +97,287 @@ PanelWindow {
 
                 // ── Content pane ────────────────────────────────────────────
                 Item {
+                    id: pane
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    // Close button (top-right of the pane)
                     Rectangle {
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.margins: 14
-                        z: 2
+                        z: 3
                         width: 30; height: 30; radius: 15
                         color: closeMa.containsMouse ? Theme.hover : Theme.surfaceHigh
                         MaterialIcon { anchors.centerIn: parent; icon: "close"; size: 18; color: Theme.text }
                         MouseArea { id: closeMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ShellState.closeAll() }
                     }
 
-                    Flickable {
+                    // ===== Wallpaper =====
+                    ColumnLayout {
                         anchors.fill: parent
                         anchors.margins: 24
-                        anchors.topMargin: 20
-                        clip: true
-                        contentHeight: pane.implicitHeight
-                        boundsBehavior: Flickable.StopAtBounds
+                        spacing: 14
+                        visible: win.section === "wallpaper"
+                        onVisibleChanged: if (visible) Wallpaper.refresh()
 
-                        ColumnLayout {
-                            id: pane
-                            width: parent.width
-                            spacing: 18
+                        Text { text: "Wallpaper"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
 
-                            Text {
-                                text: win.section === "personalization" ? "Personalization"
-                                    : win.section === "device" ? "Device"
-                                    : "About"
-                                color: Theme.text
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontTitle
-                                font.weight: Font.Bold
-                            }
-
-                            // ── Personalization ─────────────────────────────
-                            SectionLabel { text: "Wallpaper"; visible: win.section === "personalization" }
-                            GridView {
-                                Layout.fillWidth: true
-                                Layout.preferredHeight: visible ? Math.min(300, Math.ceil(Wallpaper.walls.length / colsN) * 84 + 8) : 0
-                                visible: win.section === "personalization" && Wallpaper.walls.length > 0
-                                readonly property int colsN: Math.max(1, Math.floor(width / 148))
-                                cellWidth: width / colsN
-                                cellHeight: 84
-                                clip: true
-                                interactive: false
-                                model: Wallpaper.walls
-                                delegate: Item {
-                                    required property var modelData
-                                    width: GridView.view.cellWidth
-                                    height: 84
-                                    Rectangle {
-                                        anchors.centerIn: parent
-                                        width: parent.width - 8
-                                        height: 76
-                                        radius: Theme.radiusSmall
-                                        color: Theme.surfaceHigh
-                                        clip: true
-                                        border.width: Wallpaper.current === modelData ? 3 : 0
-                                        border.color: Theme.accent
-                                        Image {
-                                            anchors.fill: parent
-                                            anchors.margins: Wallpaper.current === modelData ? 3 : 0
-                                            source: "file://" + modelData
-                                            fillMode: Image.PreserveAspectCrop
-                                            asynchronous: true
-                                            sourceSize.width: 300
-                                            sourceSize.height: 180
-                                        }
-                                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Wallpaper.apply(modelData) }
-                                    }
-                                }
-                            }
-                            Text {
-                                Layout.fillWidth: true
-                                visible: win.section === "personalization" && Wallpaper.walls.length === 0
-                                text: "No images in " + Wallpaper.dir
-                                color: Theme.textDim
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSmall
-                                wrapMode: Text.Wrap
-                            }
-
-                            SectionLabel { text: "Theme (Base16)"; visible: win.section === "personalization" }
-                            Flow {
-                                Layout.fillWidth: true
-                                visible: win.section === "personalization"
-                                spacing: 6
-                                Repeater {
-                                    model: Flavours.schemes
-                                    delegate: Rectangle {
-                                        required property var modelData
-                                        readonly property bool sel: Flavours.current === modelData.slug
-                                        height: 32
-                                        width: pillTxt.implicitWidth + 24
-                                        radius: 16
-                                        color: sel ? Theme.accent : (pillMa.containsMouse ? Theme.hover : Theme.surfaceHigh)
-                                        Text {
-                                            id: pillTxt
-                                            anchors.centerIn: parent
-                                            text: modelData.name
-                                            color: parent.sel ? Theme.textOnAccent : Theme.text
-                                            font.family: Theme.fontFamily
-                                            font.pixelSize: Theme.fontSmall
-                                            font.weight: Font.Medium
-                                        }
-                                        MouseArea { id: pillMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Flavours.apply(modelData.slug) }
-                                    }
-                                }
-                                Rectangle {
-                                    visible: Flavours.schemes.length === 0
-                                    height: 32; width: fEmpty.implicitWidth + 24; radius: 16; color: Theme.surfaceHigh
-                                    Text { id: fEmpty; anchors.centerIn: parent; text: "Install `flavours`"; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall }
-                                }
-                            }
-
-                            // ── Device ──────────────────────────────────────
-                            SectionLabel { text: "Updates"; visible: win.section === "device" }
-                            Rectangle {
-                                Layout.fillWidth: true
-                                visible: win.section === "device"
-                                height: 56
-                                radius: Theme.radius
-                                color: Theme.surfaceBright
-                                RowLayout {
-                                    anchors.fill: parent
-                                    anchors.leftMargin: 14
-                                    anchors.rightMargin: 10
-                                    spacing: 12
-                                    MaterialIcon { icon: "system_update_alt"; size: 22; color: Updates.count > 0 ? Theme.accent : Theme.textDim }
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: 0
-                                        Text {
-                                            text: Updates.checking ? "Checking…"
-                                                : Updates.count > 0 ? (Updates.count + " update" + (Updates.count > 1 ? "s" : "") + " available")
-                                                : "System is up to date"
-                                            color: Theme.text
-                                            font.family: Theme.fontFamily
-                                            font.pixelSize: Theme.fontBody
-                                            font.weight: Font.Medium
-                                        }
-                                        Text { text: "xbps (Void Linux)"; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall }
-                                    }
-                                    PillButton {
-                                        label: Updates.count > 0 ? "Update" : "Check"
-                                        accent: Updates.count > 0
-                                        onClicked: Updates.count > 0 ? Updates.update() : Updates.refresh()
-                                    }
-                                }
-                            }
-
-                            SectionLabel { text: "Power"; visible: win.section === "device" }
-                            RowLayout {
-                                Layout.fillWidth: true
-                                visible: win.section === "device"
-                                spacing: 8
-                                PowerBtn { icon: "lock"; label: "Lock"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); } }
-                                PowerBtn { icon: "bedtime"; label: "Sleep"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl suspend || loginctl suspend"]); } }
-                                PowerBtn { icon: "restart_alt"; label: "Restart"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl reboot || systemctl reboot"]); } }
-                                PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl poweroff || systemctl poweroff"]); } }
-                            }
-
-                            // ── About ───────────────────────────────────────
-                            Rectangle {
-                                Layout.fillWidth: true
-                                visible: win.section === "about"
-                                implicitHeight: aboutCol.implicitHeight + 24
-                                radius: Theme.radius
-                                color: Theme.surfaceBright
-                                ColumnLayout {
-                                    id: aboutCol
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.leftMargin: 14
-                                    anchors.rightMargin: 14
-                                    spacing: 8
-                                    AboutRow { k: "Device"; v: SysInfo.user + "@" + SysInfo.host }
-                                    AboutRow { k: "Operating system"; v: SysInfo.distro }
-                                    AboutRow { k: "Kernel"; v: SysInfo.kernel }
-                                    AboutRow { k: "Compositor"; v: SysInfo.wm }
-                                    AboutRow { k: "Uptime"; v: SysInfo.uptime }
-                                    AboutRow { k: "Shell"; v: "quickshell-chrome" }
-                                }
-                            }
-                            Text {
-                                Layout.fillWidth: true
-                                visible: win.section === "about"
-                                text: "A Chrome OS–style desktop shell for Quickshell."
-                                color: Theme.textDim
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSmall
-                                wrapMode: Text.Wrap
-                            }
-
-                            Item { Layout.fillHeight: true; Layout.preferredHeight: 4 }
+                        Text {
+                            Layout.fillWidth: true
+                            visible: Wallpaper.walls.length === 0
+                            text: "No images found in\n" + Wallpaper.dir + "\n\nAdd images there, or set $QUICKSHELL_WALLPAPERS."
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                            wrapMode: Text.Wrap
                         }
+
+                        GridView {
+                            id: wpGrid
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            visible: Wallpaper.walls.length > 0
+                            clip: true
+                            model: Wallpaper.walls
+                            cellWidth: Math.floor(width / 3)
+                            cellHeight: Math.round(cellWidth * 0.62)
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            delegate: Item {
+                                required property var modelData
+                                width: wpGrid.cellWidth
+                                height: wpGrid.cellHeight
+                                Rectangle {
+                                    anchors.fill: parent
+                                    anchors.margins: 4
+                                    radius: Theme.radiusSmall
+                                    color: Theme.surfaceHigh
+                                    clip: true
+                                    readonly property bool sel: Wallpaper.current === modelData
+                                    border.width: sel || wpHover.hovered ? 3 : 0
+                                    border.color: sel ? Theme.accent : Theme.outlineStrong
+                                    Image {
+                                        anchors.fill: parent
+                                        source: win.fileUrl(modelData)
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        cache: true
+                                        sourceSize.width: 300
+                                        sourceSize.height: 180
+                                    }
+                                    HoverHandler { id: wpHover }
+                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Wallpaper.apply(modelData) }
+                                }
+                            }
+                        }
+                    }
+
+                    // ===== Theme =====
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 24
+                        spacing: 12
+                        visible: win.section === "theme"
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Text { Layout.fillWidth: true; text: "Theme"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
+                            // light / dark switch
+                            Rectangle {
+                                width: modeRow.implicitWidth + 24
+                                height: 34
+                                radius: 17
+                                color: modeMa.containsMouse ? Theme.hover : Theme.surfaceHigh
+                                RowLayout {
+                                    id: modeRow
+                                    anchors.centerIn: parent
+                                    spacing: 8
+                                    MaterialIcon { icon: Flavours.mode === "light" ? "light_mode" : "dark_mode"; size: 18; color: Theme.text }
+                                    Text { text: Flavours.mode === "light" ? "Light" : "Dark"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall; font.weight: Font.Medium }
+                                }
+                                MouseArea { id: modeMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Flavours.toggleMode() }
+                            }
+                        }
+
+                        // search
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 40
+                            radius: 20
+                            color: Theme.surfaceHigh
+                            border.width: tsearch.activeFocus ? 2 : 0
+                            border.color: Theme.accent
+                            Row {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 10
+                                MaterialIcon { anchors.verticalCenter: parent.verticalCenter; icon: "search"; size: 18; color: Theme.textDim }
+                                TextInput {
+                                    id: tsearch
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width - 28
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    clip: true
+                                    onTextChanged: win.themeQuery = text
+                                    Text {
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "Search schemes…"
+                                        color: Theme.textFaint
+                                        font: tsearch.font
+                                        visible: tsearch.text.length === 0
+                                    }
+                                }
+                            }
+                        }
+
+                        ListView {
+                            id: themeList
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            spacing: 3
+                            model: win.filteredFamilies
+                            boundsBehavior: Flickable.StopAtBounds
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                readonly property bool sel: Flavours.currentFamily === modelData
+                                width: themeList.width
+                                height: 40
+                                radius: Theme.radiusSmall
+                                color: sel ? Theme.surfaceHigh : (tRowMa.containsMouse ? Theme.hover : "transparent")
+
+                                Text {
+                                    anchors.left: parent.left; anchors.leftMargin: 14
+                                    anchors.right: check.left; anchors.rightMargin: 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: Flavours.title(modelData)
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    font.weight: parent.sel ? Font.Medium : Font.Normal
+                                    elide: Text.ElideRight
+                                }
+                                MaterialIcon {
+                                    id: check
+                                    anchors.right: parent.right; anchors.rightMargin: 12
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: "check"; size: 18; color: Theme.accent
+                                    visible: parent.sel
+                                }
+                                MouseArea { id: tRowMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Flavours.applyFamily(modelData) }
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            visible: Flavours.families.length === 0
+                            text: "No schemes — install `flavours` and add Base16 schemes."
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                            wrapMode: Text.Wrap
+                        }
+                    }
+
+                    // ===== Device =====
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 24
+                        spacing: 16
+                        visible: win.section === "device"
+
+                        Text { text: "Device"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
+
+                        SectionLabel { text: "Updates" }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 56
+                            radius: Theme.radius
+                            color: Theme.surfaceBright
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 10
+                                spacing: 12
+                                MaterialIcon { icon: "system_update_alt"; size: 22; color: Updates.count > 0 ? Theme.accent : Theme.textDim }
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 0
+                                    Text {
+                                        text: Updates.checking ? "Checking…"
+                                            : Updates.count > 0 ? (Updates.count + " update" + (Updates.count > 1 ? "s" : "") + " available")
+                                            : "System is up to date"
+                                        color: Theme.text
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontBody
+                                        font.weight: Font.Medium
+                                    }
+                                    Text { text: "xbps (Void Linux)"; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall }
+                                }
+                                PillButton {
+                                    label: Updates.count > 0 ? "Update" : "Check"
+                                    accent: Updates.count > 0
+                                    onClicked: Updates.count > 0 ? Updates.update() : Updates.refresh()
+                                }
+                            }
+                        }
+
+                        SectionLabel { text: "Power" }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+                            PowerBtn { icon: "lock"; label: "Lock"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); } }
+                            PowerBtn { icon: "bedtime"; label: "Sleep"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl suspend || loginctl suspend"]); } }
+                            PowerBtn { icon: "restart_alt"; label: "Restart"; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl reboot || systemctl reboot"]); } }
+                            PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl poweroff || systemctl poweroff"]); } }
+                        }
+
+                        Item { Layout.fillHeight: true }
+                    }
+
+                    // ===== About =====
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: 24
+                        spacing: 16
+                        visible: win.section === "about"
+
+                        Text { text: "About"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: aboutCol.implicitHeight + 24
+                            radius: Theme.radius
+                            color: Theme.surfaceBright
+                            ColumnLayout {
+                                id: aboutCol
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 14
+                                spacing: 8
+                                AboutRow { k: "Device"; v: SysInfo.user + "@" + SysInfo.host }
+                                AboutRow { k: "Operating system"; v: SysInfo.distro }
+                                AboutRow { k: "Kernel"; v: SysInfo.kernel }
+                                AboutRow { k: "Compositor"; v: SysInfo.wm }
+                                AboutRow { k: "Uptime"; v: SysInfo.uptime }
+                                AboutRow { k: "Shell"; v: "quickshell-chrome" }
+                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            text: "A Chrome OS–style desktop shell for Quickshell."
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
+                            wrapMode: Text.Wrap
+                        }
+                        Item { Layout.fillHeight: true }
                     }
                 }
             }
