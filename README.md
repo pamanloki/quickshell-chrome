@@ -19,8 +19,9 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - Scrollable icon grid, `Enter` launches the top hit, `Esc` closes
 - **Quick settings** — bottom-right system bubble
   - Feature pods: Network (Wi-Fi), Bluetooth, Do Not Disturb, Night Light
-  - Inline **Wi-Fi** panel (scan + connect) and **Bluetooth** panel
-    (connect / disconnect) — tap a pod's chevron to expand
+  - Inline **Wi-Fi** (scan + connect), **Bluetooth** (connect / disconnect) and
+    **Night Light** (colour-temperature slider) panels — tap a pod's chevron to
+    expand
   - Brightness slider (`brightnessctl`) and volume slider (PipeWire)
   - Footer with date, battery status and Settings / Lock / Power buttons
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and

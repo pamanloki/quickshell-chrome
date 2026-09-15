@@ -24,13 +24,13 @@ PanelWindow {
 
     // Local UI state
     property bool dnd: false
-    property bool nightLight: false
-    property string expanded: ""   // "" | "wifi" | "bt"
+    property string expanded: ""   // "" | "wifi" | "bt" | "night"
 
     function toggleExpand(which) {
         expanded = (expanded === which) ? "" : which;
         if (expanded === "wifi") Network.scan();
         else if (expanded === "bt") Bluetooth.scan();
+        else if (expanded === "night") Nightlight.refresh();
     }
 
     MouseArea { anchors.fill: parent; onPressed: ShellState.closeAll() }
@@ -116,14 +116,11 @@ PanelWindow {
                         Layout.fillWidth: true
                         icon: "nightlight"
                         title: "Night Light"
-                        subtitle: qs.nightLight ? "On" : "Off"
-                        active: qs.nightLight
-                        onToggled: {
-                            qs.nightLight = !qs.nightLight;
-                            Quickshell.execDetached(qs.nightLight
-                                ? ["sh", "-c", "pkill wlsunset; wlsunset -t 4000 -T 6500 &"]
-                                : ["pkill", "wlsunset"]);
-                        }
+                        subtitle: Nightlight.active ? (Nightlight.temp + "K") : "Off"
+                        active: Nightlight.active
+                        hasDetail: true
+                        onToggled: Nightlight.toggle()
+                        onDetail: qs.toggleExpand("night")
                     }
                 }
 
@@ -280,6 +277,55 @@ PanelWindow {
                                 onClicked: modelData.connected ? Bluetooth.disconnect(modelData.mac)
                                                                : Bluetooth.connect(modelData.mac)
                             }
+                        }
+                    }
+                }
+
+                // ── Inline Night Light panel ────────────────────────────────
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: qs.expanded === "night"
+                    Layout.preferredHeight: visible ? nightCol.implicitHeight + 20 : 0
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    Column {
+                        id: nightCol
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 10
+
+                        Item {
+                            width: parent.width
+                            height: 18
+                            Text {
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "Color temperature"
+                                color: Theme.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontBody
+                            }
+                            Text {
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Nightlight.temp + "K"
+                                color: Theme.textDim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSmall
+                            }
+                        }
+
+                        QsSlider {
+                            width: parent.width
+                            icon: "nightlight"
+                            value: Nightlight.fraction
+                            onMoved: (v) => Nightlight.setTemp(
+                                Nightlight.minTemp + v * (Nightlight.maxTemp - Nightlight.minTemp))
                         }
                     }
                 }
