@@ -67,6 +67,9 @@ PanelWindow {
                     Layout.fillHeight: true
                     Layout.preferredWidth: 220
                     color: Theme.surfaceBright
+                    // round the left corners to match the panel
+                    topLeftRadius: Theme.radiusLarge
+                    bottomLeftRadius: Theme.radiusLarge
 
                     ColumnLayout {
                         anchors.fill: parent
