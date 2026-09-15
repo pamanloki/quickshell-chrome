@@ -45,6 +45,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   screenshots straight from the shelf
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Workspace indicator** — niri workspace pips on the shelf
+- **Shelf context menu** — right-click empty shelf space to toggle auto-hide
+  or jump to the wallpaper / theme / settings panes
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
 - Multi-monitor aware — a shelf per screen; popups open on the active screen only
 
@@ -173,6 +175,7 @@ components/
   MusicPanel.qml       # standalone Now Playing popup (status-area glyph)
   Calendar.qml         # month-view popup (click the clock)
   DockMenu.qml         # dock right-click Add/Remove from Dock
+  ShelfMenu.qml        # right-click empty shelf (autohide / wallpaper / settings)
   Toasts.qml           # notification toasts
   Osd.qml              # volume / brightness on-screen display
   QsToggle.qml QsSlider.qml QsIconButton.qml

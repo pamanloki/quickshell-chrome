@@ -114,6 +114,17 @@ PanelWindow {
             height: 1
             color: Theme.outline
         }
+
+        // Right-click empty shelf space → context menu. Sits below the app
+        // rows / status area, so those consume their own clicks first.
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: (m) => {
+                ShellState.activeScreen = shelf.modelData;
+                ShellState.openShelfMenu(m.x, shelf.modelData);
+            }
+        }
     }
 
     // Launcher + workspaces — far left

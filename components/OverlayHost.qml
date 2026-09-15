@@ -50,6 +50,11 @@ Scope {
     }
 
     LazyLoader {
+        active: ShellState.shelfMenuOpen && host.onThisScreen
+        ShelfMenu { screen: host.modelData }
+    }
+
+    LazyLoader {
         active: ShellState.settingsOpen && host.onThisScreen
         Settings { screen: host.modelData }
     }

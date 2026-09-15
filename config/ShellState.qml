@@ -20,7 +20,18 @@ Singleton {
 
     readonly property bool anyOpen: launcherOpen || quickSettingsOpen || calendarOpen
         || notificationsOpen || settingsOpen || toteOpen || musicOpen
-        || dockMenuOpen || trayMenuOpen
+        || dockMenuOpen || trayMenuOpen || shelfMenuOpen
+
+    // Right-click menu on empty shelf space.
+    property bool shelfMenuOpen: false
+    property real shelfMenuX: 0
+
+    function openShelfMenu(x, screen) {
+        closeAll();
+        shelfMenuX = x;
+        activeScreen = screen;
+        shelfMenuOpen = true;
+    }
 
     // Dock right-click context menu.
     property bool dockMenuOpen: false
@@ -126,5 +137,6 @@ Singleton {
         musicOpen = false;
         dockMenuOpen = false;
         trayMenuOpen = false;
+        shelfMenuOpen = false;
     }
 }
