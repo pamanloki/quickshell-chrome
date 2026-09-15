@@ -44,6 +44,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   and clears itself a few minutes later; open, copy, or delete recent
   screenshots straight from the shelf
 - **Frequent apps** — the launcher surfaces your most-used apps
+- **Launcher context menu** — right-click any app to Open it or pin/unpin it
+  to the shelf
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Shelf context menu** — right-click empty shelf space to toggle auto-hide
   or jump to the wallpaper / theme / settings panes

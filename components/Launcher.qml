@@ -96,6 +96,20 @@ PanelWindow {
 
             function focusSearch() { search.forceActiveFocus(); }
 
+            // In-bubble right-click context menu (Open / Pin to shelf).
+            property bool ctxOpen: false
+            property var ctxEntry: null
+            property real ctxX: 0
+            property real ctxY: 0
+            function openCtx(entry, srcItem, mx, my) {
+                if (!entry) return;
+                const p = srcItem.mapToItem(bubble, mx, my);
+                ctxEntry = entry;
+                ctxX = Math.max(8, Math.min(p.x, width - 196));
+                ctxY = Math.max(8, Math.min(p.y, height - 92));
+                ctxOpen = true;
+            }
+
             transformOrigin: Item.BottomLeft
             Component.onCompleted: { scale = 0.94; opacity = 0; showAnim.start(); }
             ParallelAnimation {
@@ -213,6 +227,12 @@ PanelWindow {
                                         radius: parent.radius
                                         onClicked: launcher.launch(modelData)
                                     }
+                                    MouseArea {
+                                        id: freqCtxMa
+                                        anchors.fill: parent
+                                        acceptedButtons: Qt.RightButton
+                                        onClicked: (m) => bubble.openCtx(modelData, freqCtxMa, m.x, m.y)
+                                    }
                                 }
                             }
                         }
@@ -280,6 +300,12 @@ PanelWindow {
                                 radius: parent.radius
                                 onClicked: launcher.launch(cell.modelData)
                             }
+                            MouseArea {
+                                id: gridCtxMa
+                                anchors.fill: parent
+                                acceptedButtons: Qt.RightButton
+                                onClicked: (m) => bubble.openCtx(cell.modelData, gridCtxMa, m.x, m.y)
+                            }
                         }
                     }
                 }
@@ -295,6 +321,92 @@ PanelWindow {
                     font.pixelSize: Theme.fontBody
                 }
             }
+
+            // Click-away layer for the context menu.
+            MouseArea {
+                anchors.fill: parent
+                visible: bubble.ctxOpen
+                z: 50
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onPressed: bubble.ctxOpen = false
+            }
+
+            // Right-click context menu (Open / Pin to shelf).
+            Rectangle {
+                visible: bubble.ctxOpen
+                z: 51
+                x: bubble.ctxX
+                y: bubble.ctxY
+                width: 188
+                height: ctxCol.implicitHeight + 10
+                radius: Theme.radius
+                color: Theme.surfaceGlass
+                border.width: 1
+                border.color: Theme.outline
+
+                Column {
+                    id: ctxCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.margins: 5
+                    spacing: 1
+
+                    LauncherCtxItem {
+                        icon: "open_in_new"
+                        label: "Open"
+                        onTriggered: launcher.launch(bubble.ctxEntry)
+                    }
+                    LauncherCtxItem {
+                        readonly property bool pinned:
+                            bubble.ctxEntry ? DockConfig.isPinned(bubble.ctxEntry.id) : false
+                        icon: pinned ? "keep_off" : "keep"
+                        label: pinned ? "Unpin from shelf" : "Pin to shelf"
+                        onTriggered: {
+                            if (!bubble.ctxEntry) return;
+                            if (pinned) DockConfig.unpin(bubble.ctxEntry.id);
+                            else DockConfig.pin(bubble.ctxEntry.id);
+                            bubble.ctxOpen = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    component LauncherCtxItem: Rectangle {
+        property string icon: ""
+        property string label: ""
+        signal triggered()
+        width: parent ? parent.width : 0
+        height: 36
+        radius: Theme.radiusSmall
+        color: ctxItemMa.containsMouse ? Theme.hover : "transparent"
+
+        MaterialIcon {
+            id: ctxItemIcon
+            anchors.left: parent.left
+            anchors.leftMargin: 8
+            anchors.verticalCenter: parent.verticalCenter
+            icon: parent.icon
+            size: 18
+            color: Theme.text
+        }
+        Text {
+            anchors.left: ctxItemIcon.right
+            anchors.leftMargin: 10
+            anchors.verticalCenter: parent.verticalCenter
+            text: parent.label
+            color: Theme.text
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontBody
+        }
+        MouseArea {
+            id: ctxItemMa
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: parent.triggered()
         }
     }
 }
