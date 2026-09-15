@@ -1,0 +1,69 @@
+# ChromeOS-style swaylock config for quickshell-chrome.
+# Copy to ~/.config/swaylock/config   (swaylock reads it automatically).
+#
+# Works with plain `swaylock`. Colors are RRGGBB or RRGGBBAA (no leading #).
+# ChromeOS dark palette: surface #202124, accent blue #8ab4f8, error #f28b82,
+# text #e8eaed.
+
+# Behaviour
+ignore-empty-password
+show-failed-attempts
+
+# Background — solid ChromeOS grey. For the real "blurred wallpaper" look,
+# point `image` at your wallpaper (swaylock can't blur; use swaylock-effects
+# for that — see the bottom of this file).
+color=202124
+# image=~/.config/background.jpg
+# scaling=fill
+
+# Font (matches the shell)
+font=Google Sans
+font-size=22
+
+# Unlock indicator (ring)
+indicator-radius=110
+indicator-thickness=8
+indicator-caps-lock
+
+# Ring
+ring-color=3c4043
+ring-clear-color=8ab4f8
+ring-ver-color=8ab4f8
+ring-wrong-color=f28b82
+ring-caps-lock-color=fdd663
+
+# Inside of the ring
+inside-color=202124e6
+inside-clear-color=202124e6
+inside-ver-color=202124e6
+inside-wrong-color=202124e6
+
+# Highlights while typing
+key-hl-color=8ab4f8
+bs-hl-color=f28b82
+caps-lock-key-hl-color=fdd663
+caps-lock-bs-hl-color=f28b82
+
+# Text
+text-color=e8eaed
+text-clear-color=e8eaed
+text-ver-color=e8eaed
+text-wrong-color=f28b82
+
+# Hide the hard lines around the ring (cleaner ChromeOS look)
+separator-color=00000000
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+line-caps-lock-color=00000000
+
+# ── swaylock-effects only (delete the leading # if you use that fork) ────────
+# These options fail on plain swaylock, so they stay commented by default.
+# clock
+# timestr=%-I:%M %p
+# datestr=%A, %B %-d
+# indicator
+# effect-blur=8x4
+# effect-vignette=0.4:0.4
+# fade-in=0.2

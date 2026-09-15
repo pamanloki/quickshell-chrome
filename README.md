@@ -160,6 +160,11 @@ A ready-made **niri** keybind block using these lives in
 [`niri/binds.kdl`](niri/binds.kdl) — copy it into `~/.config/niri/config.kdl`.
 Handlers are defined in `components/Ipc.qml`.
 
+A ChromeOS-styled **swaylock** config lives in
+[`swaylock/config`](swaylock/config) — copy it to `~/.config/swaylock/config`
+(`xbps-install -S swaylock` first). The shell's lock action uses it
+automatically.
+
 ## Theming (Base16)
 
 `config/Theme.qml` loads a Base16 palette (`base00`–`base0F`) from a colors file
