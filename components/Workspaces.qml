@@ -12,6 +12,12 @@ RowLayout {
     spacing: 6
     visible: Niri.onNiri && Niri.workspaces.length > 0
 
+    // Scroll to switch workspace.
+    WheelHandler {
+        acceptedButtons: Qt.NoButton
+        onWheel: (e) => { if (e.angleDelta.y > 0) Niri.focusUp(); else Niri.focusDown(); }
+    }
+
     Repeater {
         model: Niri.workspaces
         delegate: Rectangle {

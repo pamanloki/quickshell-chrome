@@ -24,6 +24,12 @@ Item {
 
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
 
+        // Scroll anywhere on the status pill to change volume.
+        WheelHandler {
+            acceptedButtons: Qt.NoButton
+            onWheel: (e) => Audio.setVolume(Audio.volume + (e.angleDelta.y > 0 ? 0.05 : -0.05))
+        }
+
         RowLayout {
             id: content
             anchors.centerIn: parent

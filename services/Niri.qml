@@ -22,6 +22,8 @@ Singleton {
     function focusWorkspace(idx) {
         Quickshell.execDetached(["niri", "msg", "action", "focus-workspace", String(idx)]);
     }
+    function focusUp() { Quickshell.execDetached(["niri", "msg", "action", "focus-workspace-up"]); }
+    function focusDown() { Quickshell.execDetached(["niri", "msg", "action", "focus-workspace-down"]); }
 
     function handleEvent(ev) {
         if (ev.WorkspacesChanged) {
