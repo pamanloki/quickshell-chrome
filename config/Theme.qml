@@ -14,7 +14,7 @@ Singleton {
     readonly property color accent:        "#8ab4f8"   // ChromeOS/Google blue
     readonly property color accentPressed:  "#aecbfa"
     readonly property color accentText:     "#062e6f"
-    readonly property color onAccent:       "#062e6f"
+    readonly property color textOnAccent:   "#062e6f"
 
     // ── Surfaces (translucent dark, like the ChromeOS shelf & bubbles) ───────
     readonly property color shelf:          Qt.rgba(0.13, 0.14, 0.16, 0.72)

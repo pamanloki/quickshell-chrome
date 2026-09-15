@@ -60,7 +60,7 @@ Item {
             icon: root.icon
             size: 20
             fill: 1
-            color: Theme.onAccent
+            color: Theme.textOnAccent
 
             MouseArea {
                 anchors.fill: parent

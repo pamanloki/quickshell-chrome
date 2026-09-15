@@ -47,7 +47,7 @@ Item {
                     icon: root.icon
                     size: 20
                     fill: root.active ? 1 : 0
-                    color: root.active ? Theme.onAccent : Theme.text
+                    color: root.active ? Theme.textOnAccent : Theme.text
                 }
             }
 
@@ -57,7 +57,7 @@ Item {
                 spacing: 1
                 Text {
                     text: root.title
-                    color: root.active ? Theme.onAccent : Theme.text
+                    color: root.active ? Theme.textOnAccent : Theme.text
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontBody
                     font.weight: Font.Medium
@@ -95,7 +95,7 @@ Item {
                 anchors.centerIn: parent
                 icon: "chevron_right"
                 size: 20
-                color: root.active ? Theme.onAccent : Theme.textDim
+                color: root.active ? Theme.textOnAccent : Theme.textDim
             }
             MouseArea {
                 anchors.fill: parent
