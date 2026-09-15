@@ -18,6 +18,7 @@ Item {
 
     signal toggled()
     signal detail()
+    signal rightClicked(real gx, real gy)
 
     implicitHeight: 64
 
@@ -79,6 +80,16 @@ Item {
         StateLayer {
             radius: bg.radius
             onClicked: root.toggled()
+        }
+
+        // Right-click → context menu (used by the screen-capture pod)
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: {
+                const p = root.mapToItem(null, root.width / 2, 0);
+                root.rightClicked(p.x, p.y);
+            }
         }
 
         // Detail chevron (own hit target on top of the state layer)

@@ -74,10 +74,15 @@ Singleton {
         notificationsOpen = next;
     }
 
-    function toggleSettings() {
+    property string settingsSection: "wallpaper"
+
+    function toggleSettings(sect) {
         const next = !settingsOpen;
         closeAll();
-        settingsOpen = next;
+        if (next) {
+            settingsSection = sect || "wallpaper";
+            settingsOpen = true;
+        }
     }
 
     function closeAll() {

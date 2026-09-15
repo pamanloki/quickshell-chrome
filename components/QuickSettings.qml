@@ -24,6 +24,9 @@ PanelWindow {
 
     // Local UI state
     property string expanded: ""   // "" | "wifi" | "bt" | "night" | "audio"
+    property bool captureMenuOpen: false
+    property real captureMenuX: 0
+    property real captureMenuY: 0
 
     function toggleExpand(which) {
         expanded = (expanded === which) ? "" : which;
@@ -161,8 +164,9 @@ PanelWindow {
                         Layout.fillWidth: true
                         icon: "screenshot_region"
                         title: "Screen capture"
-                        subtitle: "Select region"
-                        onToggled: { ShellState.closeAll(); Screenshot.region(); }
+                        subtitle: Screenshot.modeLabel
+                        onToggled: { ShellState.closeAll(); Screenshot.capture(); }
+                        onRightClicked: (gx, gy) => { qs.captureMenuX = gx; qs.captureMenuY = gy; qs.captureMenuOpen = true; }
                     }
                     QsToggle {
                         Layout.fillWidth: true
@@ -171,7 +175,7 @@ PanelWindow {
                         subtitle: Flavours.mode === "light" ? "Light" : "Dark"
                         onToggled: Flavours.toggleMode()
                         hasDetail: true
-                        onDetail: ShellState.toggleSettings()
+                        onDetail: ShellState.toggleSettings("theme")
                     }
                 }
 
@@ -538,6 +542,81 @@ PanelWindow {
                         icon: "power_settings_new"
                         iconColor: Theme.bad
                         onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "wlogout || systemctl poweroff"]); }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Screen-capture right-click menu (region/full × clipboard/file) ───────
+    Item {
+        anchors.fill: parent
+        visible: qs.captureMenuOpen
+
+        MouseArea { anchors.fill: parent; onPressed: qs.captureMenuOpen = false }
+
+        Rectangle {
+            id: capMenu
+            width: 232
+            height: capCol.implicitHeight + 10
+            radius: Theme.radius
+            color: Theme.surfaceGlass
+            border.width: 1
+            border.color: Theme.outline
+            x: Math.max(Theme.gap, Math.min(qs.captureMenuX - width / 2, parent.width - width - Theme.gap))
+            y: Math.max(Theme.gap, qs.captureMenuY - height - Theme.gap)
+
+            MouseArea { anchors.fill: parent }
+
+            Column {
+                id: capCol
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: 5 }
+                spacing: 1
+
+                Repeater {
+                    model: Screenshot.modes
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: capCol.width
+                        height: 38
+                        radius: Theme.radiusSmall
+                        readonly property bool sel: Screenshot.mode === modelData.id
+                        color: capMa.containsMouse ? Theme.hover : (sel ? Theme.surfaceHigh : "transparent")
+
+                        MaterialIcon {
+                            id: capIcon
+                            anchors.left: parent.left; anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            icon: modelData.icon; size: 18; color: Theme.text
+                        }
+                        Text {
+                            anchors.left: capIcon.right; anchors.leftMargin: 10
+                            anchors.right: capChk.left; anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: modelData.label
+                            color: Theme.text
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontBody
+                            elide: Text.ElideRight
+                        }
+                        MaterialIcon {
+                            id: capChk
+                            anchors.right: parent.right; anchors.rightMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            icon: "check"; size: 16; color: Theme.accent
+                            visible: parent.sel
+                        }
+                        MouseArea {
+                            id: capMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                qs.captureMenuOpen = false;
+                                ShellState.closeAll();
+                                Screenshot.pickAndCapture(modelData.id);
+                            }
+                        }
                     }
                 }
             }

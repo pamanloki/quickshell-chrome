@@ -22,7 +22,7 @@ PanelWindow {
     exclusiveZone: 0
     color: "transparent"
 
-    property string section: "wallpaper"
+    property string section: ShellState.settingsSection
     property string themeQuery: ""
     readonly property var filteredFamilies: {
         const q = themeQuery.toLowerCase().trim();
