@@ -7,9 +7,9 @@ import "root:/config"
 import "root:/services"
 
 /**
- * Dedicated notification center — its own panel (not merged into quick
+ * Standalone notification center — its own bubble (not merged into quick
  * settings), bottom-right above the shelf. Header with Clear all, a scrollable
- * history, and an empty state. Opened by the status-area bell.
+ * history, and a compact empty state. Opened by the status-area bell.
  */
 PanelWindow {
     id: nc
@@ -44,9 +44,12 @@ PanelWindow {
 
         sourceComponent: Rectangle {
             id: bubble
+            readonly property bool empty: Notifications.history.length === 0
+            readonly property int maxH: nc.height - Theme.shelfHeight - 2 * Theme.gapLarge
+
             width: 390
-            height: Math.min(nc.height - Theme.shelfHeight - 2 * Theme.gapLarge,
-                             header.implicitHeight + list.contentHeight + 3 * Theme.gapLarge + 12)
+            height: empty ? 160
+                          : Math.min(maxH, col.implicitHeight + 2 * Theme.gapLarge)
             radius: Theme.radiusLarge
             color: Theme.surfaceGlass
             border.width: 1
@@ -62,154 +65,157 @@ PanelWindow {
 
             MouseArea { anchors.fill: parent }
 
-            // Header
-            RowLayout {
-                id: header
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+            ColumnLayout {
+                id: col
+                anchors.fill: parent
                 anchors.margins: Theme.gapLarge
-                Text {
+                spacing: Theme.gap
+
+                // Header
+                RowLayout {
                     Layout.fillWidth: true
-                    text: "Notifications"
-                    color: Theme.text
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontTitle
-                    font.weight: Font.Medium
-                }
-                Rectangle {
-                    visible: Notifications.history.length > 0
-                    width: clearTxt.implicitWidth + 20
-                    height: 28
-                    radius: 14
-                    color: clearMa.containsMouse ? Theme.hover : Theme.surfaceHigh
                     Text {
-                        id: clearTxt
-                        anchors.centerIn: parent
-                        text: "Clear all"
+                        Layout.fillWidth: true
+                        text: "Notifications"
                         color: Theme.text
                         font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSmall
+                        font.pixelSize: Theme.fontTitle
+                        font.weight: Font.Medium
                     }
-                    MouseArea {
-                        id: clearMa
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: Notifications.clearHistory()
-                    }
-                }
-            }
-
-            // Empty state
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 8
-                visible: Notifications.history.length === 0
-                MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
-                    icon: "notifications_none"
-                    size: 40
-                    color: Theme.textFaint
-                }
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: "No notifications"
-                    color: Theme.textDim
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontBody
-                }
-            }
-
-            // History
-            ListView {
-                id: list
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: header.bottom
-                anchors.bottom: parent.bottom
-                anchors.leftMargin: Theme.gapLarge
-                anchors.rightMargin: Theme.gapLarge
-                anchors.topMargin: Theme.gap
-                anchors.bottomMargin: Theme.gapLarge
-                clip: true
-                spacing: Theme.gap
-                model: Notifications.history
-                boundsBehavior: Flickable.StopAtBounds
-
-                delegate: Rectangle {
-                    required property var modelData
-                    width: list.width
-                    implicitHeight: Math.max(58, drow.implicitHeight + 20)
-                    radius: Theme.radius
-                    color: Theme.surfaceHigh
-
-                    RowLayout {
-                        id: drow
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 8
-                        spacing: 12
-
-                        IconImage {
-                            Layout.alignment: Qt.AlignTop
-                            implicitWidth: 30
-                            implicitHeight: 30
-                            source: {
-                                const img = modelData.image || "";
-                                if (img.length > 0) return img;
-                                return Quickshell.iconPath(modelData.appIcon || "dialog-information", "dialog-information");
-                            }
+                    Rectangle {
+                        visible: !bubble.empty
+                        width: clearTxt.implicitWidth + 20
+                        height: 28
+                        radius: 14
+                        color: clearMa.containsMouse ? Theme.hover : Theme.surfaceHigh
+                        Text {
+                            id: clearTxt
+                            anchors.centerIn: parent
+                            text: "Clear all"
+                            color: Theme.text
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSmall
                         }
+                        MouseArea {
+                            id: clearMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Notifications.clearHistory()
+                        }
+                    }
+                }
 
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 2
-                            RowLayout {
+                // Empty state
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    visible: bubble.empty
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        MaterialIcon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            icon: "notifications_none"
+                            size: 36
+                            color: Theme.textFaint
+                        }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: "No notifications"
+                            color: Theme.textDim
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontBody
+                        }
+                    }
+                }
+
+                // History
+                ListView {
+                    id: list
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.preferredHeight: contentHeight
+                    visible: !bubble.empty
+                    clip: true
+                    spacing: Theme.gap
+                    model: Notifications.history
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: list.width
+                        implicitHeight: Math.max(58, drow.implicitHeight + 20)
+                        radius: Theme.radius
+                        color: Theme.surfaceHigh
+
+                        RowLayout {
+                            id: drow
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 8
+                            spacing: 12
+
+                            IconImage {
+                                Layout.alignment: Qt.AlignTop
+                                implicitWidth: 30
+                                implicitHeight: 30
+                                source: {
+                                    const img = modelData.image || "";
+                                    if (img.length > 0) return img;
+                                    return Quickshell.iconPath(modelData.appIcon || "dialog-information", "dialog-information");
+                                }
+                            }
+
+                            ColumnLayout {
                                 Layout.fillWidth: true
+                                spacing: 2
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: modelData.summary || modelData.appName
+                                        color: Theme.text
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontBody
+                                        font.weight: Font.Medium
+                                        elide: Text.ElideRight
+                                    }
+                                    Text {
+                                        text: nc.ago(modelData.time)
+                                        color: Theme.textFaint
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSmall
+                                    }
+                                }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: modelData.summary || modelData.appName
-                                    color: Theme.text
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontBody
-                                    font.weight: Font.Medium
-                                    elide: Text.ElideRight
-                                }
-                                Text {
-                                    text: nc.ago(modelData.time)
-                                    color: Theme.textFaint
+                                    visible: (modelData.body || "").length > 0
+                                    text: modelData.body
+                                    color: Theme.textDim
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSmall
+                                    wrapMode: Text.Wrap
+                                    maximumLineCount: 4
+                                    elide: Text.ElideRight
+                                    textFormat: Text.PlainText
                                 }
                             }
-                            Text {
-                                Layout.fillWidth: true
-                                visible: (modelData.body || "").length > 0
-                                text: modelData.body
-                                color: Theme.textDim
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSmall
-                                wrapMode: Text.Wrap
-                                maximumLineCount: 4
-                                elide: Text.ElideRight
-                                textFormat: Text.PlainText
-                            }
-                        }
 
-                        Rectangle {
-                            Layout.alignment: Qt.AlignTop
-                            width: 26; height: 26; radius: 13
-                            color: dclose.containsMouse ? Theme.hover : "transparent"
-                            MaterialIcon { anchors.centerIn: parent; icon: "close"; size: 16; color: Theme.textDim }
-                            MouseArea {
-                                id: dclose
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: Notifications.removeHistory(modelData.id)
+                            Rectangle {
+                                Layout.alignment: Qt.AlignTop
+                                width: 26; height: 26; radius: 13
+                                color: dclose.containsMouse ? Theme.hover : "transparent"
+                                MaterialIcon { anchors.centerIn: parent; icon: "close"; size: 16; color: Theme.textDim }
+                                MouseArea {
+                                    id: dclose
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: Notifications.removeHistory(modelData.id)
+                                }
                             }
                         }
                     }

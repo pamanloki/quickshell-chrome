@@ -90,12 +90,13 @@ Everything is plain QML — edit and it hot-reloads.
 | System integrations | `services/*.qml` |
 | Widgets | `components/*.qml` |
 
-**Pin your own apps** straight from the shelf: **right-click** a running app's
-icon and choose *Add to Dock*, or right-click a pinned icon and choose *Remove
-from Dock*. The list is persisted to
-`$XDG_STATE_HOME/quickshell-chrome/dock_pinned.json` and starts empty. Left-click
-launches a pinned app (or focuses it if already running); running apps that
-aren't pinned appear after a divider with a running dot.
+**Pin your own apps** straight from the shelf: **right-click** an icon for a
+menu that lists every open window of that app (pick one to focus, or close it —
+handy when you have several `foot` terminals), plus *New window* and *Add to
+Dock* / *Remove from Dock*. The pinned list is persisted to
+`$XDG_STATE_HOME/quickshell-chrome/dock_pinned.json` and starts empty.
+Left-click launches a pinned app (or focuses it if already running); running
+apps that aren't pinned appear after a divider with a running dot.
 
 ## Theming (Base16)
 
