@@ -288,13 +288,69 @@ PanelWindow {
                     }
 
                     // ===== Device =====
-                    ColumnLayout {
+                    Flickable {
                         anchors.fill: parent
-                        anchors.margins: 24
-                        spacing: 16
                         visible: win.section === "device"
+                        clip: true
+                        contentWidth: width
+                        contentHeight: devCol.implicitHeight + 48
+                        boundsBehavior: Flickable.StopAtBounds
+
+                    ColumnLayout {
+                        id: devCol
+                        x: 24
+                        y: 24
+                        width: parent.width - 48
+                        spacing: 16
 
                         Text { text: "Device"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
+
+                        SectionLabel { text: "System" }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 128
+                            radius: Theme.radius
+                            color: Theme.surfaceBright
+
+                            // Poll live stats only while the Device pane is showing.
+                            Component.onCompleted: SysStats.active = (win.section === "device")
+                            Component.onDestruction: SysStats.active = false
+                            Connections {
+                                target: win
+                                function onSectionChanged() { SysStats.active = (win.section === "device"); }
+                            }
+
+                            GridLayout {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                columns: 2
+                                rowSpacing: 10
+                                columnSpacing: 10
+
+                                StatTile {
+                                    icon: "memory"; label: "CPU"
+                                    value: SysStats.cpu + "%"
+                                    frac: SysStats.cpu / 100
+                                }
+                                StatTile {
+                                    icon: "developer_board"; label: "Memory"
+                                    value: (SysStats.memUsedMiB / 1024).toFixed(1) + " / "
+                                         + (SysStats.memTotalMiB / 1024).toFixed(1) + " GiB"
+                                    frac: SysStats.memPct / 100
+                                }
+                                StatTile {
+                                    icon: "thermostat"; label: "Temperature"
+                                    value: SysStats.temp + "°C"
+                                    frac: Math.min(1, SysStats.temp / 100)
+                                    visible: SysStats.temp > 0
+                                }
+                                StatTile {
+                                    icon: "hard_drive"; label: "Disk"
+                                    value: SysStats.diskUsed + " / " + SysStats.diskTotal
+                                    frac: SysStats.diskPct / 100
+                                }
+                            }
+                        }
 
                         SectionLabel { text: "Updates" }
                         Rectangle {
@@ -380,8 +436,7 @@ PanelWindow {
                             PowerBtn { icon: "restart_alt"; label: "Restart"; confirm: true; onClicked: { ShellState.closeAll(); Power.reboot(); } }
                             PowerBtn { icon: "power_settings_new"; label: "Off"; danger: true; confirm: true; onClicked: { ShellState.closeAll(); Power.poweroff(); } }
                         }
-
-                        Item { Layout.fillHeight: true }
+                    }
                     }
 
                     // ===== About =====
@@ -465,6 +520,48 @@ PanelWindow {
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSmall
         font.weight: Font.Bold
+    }
+
+    component StatTile: Rectangle {
+        id: tile
+        property string icon: ""
+        property string label: ""
+        property string value: ""
+        property real frac: 0
+        Layout.fillWidth: true
+        Layout.preferredHeight: 46
+        radius: Theme.radiusSmall
+        color: Theme.surface
+
+        Column {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            spacing: 6
+
+            Item {
+                width: parent.width
+                height: 16
+                MaterialIcon { id: ti; anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter; icon: tile.icon; size: 15; color: Theme.textDim }
+                Text { anchors.left: ti.right; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; text: tile.label; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall; font.weight: Font.Medium }
+                Text { anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: tile.value; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall; font.weight: Font.Bold }
+            }
+            Rectangle {
+                width: parent.width
+                height: 5
+                radius: 2.5
+                color: Theme.surfaceHigh
+                Rectangle {
+                    height: parent.height
+                    radius: 2.5
+                    width: Math.max(0, Math.min(1, tile.frac)) * parent.width
+                    color: tile.frac > 0.85 ? Theme.bad : (tile.frac > 0.7 ? Theme.warn : Theme.accent)
+                    Behavior on width { NumberAnimation { duration: Theme.durNormal; easing.type: Easing.OutCubic } }
+                }
+            }
+        }
     }
 
     component AboutRow: RowLayout {

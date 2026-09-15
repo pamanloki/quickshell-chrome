@@ -32,7 +32,9 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **Calendar** — click the clock for a month view popup
 - **Settings panel** — opened from the quick-settings gear: Base16 **theme**
   switcher (Flavours), **wallpaper** picker (swww / swaybg), **updates** check
-  (xbps / Void), **About** system info, and power actions
+  (xbps / Void), live **system stats** (CPU / memory / temperature / disk,
+  polled only while the Device pane is open), **About** system info, and power
+  actions
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and
   live-reloads, so `flavours apply <scheme>` re-themes the shell instantly
 - **System tray** — StatusNotifierItem icons with real DBus menus
