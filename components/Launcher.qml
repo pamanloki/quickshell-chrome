@@ -87,8 +87,12 @@ PanelWindow {
 
         sourceComponent: Rectangle {
             id: bubble
-            width: 680
-            height: 560
+            width: 712
+            // Shared column width so the app grid (6 wide) lines up with the
+            // Frequent row. Height fits the search box + frequent + 3 grid rows.
+            readonly property int cellW: Math.floor((width - 40) / 6)
+            implicitHeight: col.implicitHeight + 40
+            height: implicitHeight
             radius: Theme.radiusLarge
             color: Theme.surfaceGlass
             border.width: 1
@@ -121,7 +125,10 @@ PanelWindow {
             MouseArea { anchors.fill: parent }   // swallow scrim clicks
 
             ColumnLayout {
-                anchors.fill: parent
+                id: col
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
                 anchors.margins: 20
                 spacing: 16
 
@@ -191,16 +198,17 @@ PanelWindow {
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 0
                         Repeater {
                             model: Apps.frequent(6)
                             delegate: Item {
                                 required property var modelData
-                                implicitWidth: 100
-                                implicitHeight: 88
+                                implicitWidth: bubble.cellW
+                                implicitHeight: 96
                                 Rectangle {
-                                    anchors.fill: parent
-                                    anchors.margins: 2
+                                    anchors.centerIn: parent
+                                    width: 96
+                                    height: 84
                                     radius: Theme.radius
                                     color: "transparent"
                                     Column {
@@ -214,7 +222,7 @@ PanelWindow {
                                         }
                                         Text {
                                             anchors.horizontalCenter: parent.horizontalCenter
-                                            width: 88
+                                            width: 84
                                             horizontalAlignment: Text.AlignHCenter
                                             text: modelData.name || ""
                                             color: Theme.text
@@ -248,13 +256,14 @@ PanelWindow {
                     font.weight: Font.Medium
                 }
 
-                // App grid
+                // App grid — 6 columns, 3 rows visible (scrolls for more)
                 GridView {
                     id: grid
                     Layout.fillWidth: true
-                    Layout.fillHeight: true
+                    Layout.fillHeight: false
+                    Layout.preferredHeight: 3 * cellHeight
                     clip: true
-                    cellWidth: 112
+                    cellWidth: bubble.cellW
                     cellHeight: 108
                     model: launcher.results()
                     boundsBehavior: Flickable.StopAtBounds
