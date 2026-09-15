@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.SystemTray
-import Quickshell.Widgets
 import "root:/config"
 
 /**
@@ -29,10 +28,15 @@ RowLayout {
                 anchors.centerIn: parent
                 width: 26; height: 26; radius: Theme.radiusSmall
                 color: tMa.containsMouse ? Theme.hover : "transparent"
-                IconImage {
+                Image {
                     anchors.centerIn: parent
-                    width: 17; height: 17
+                    width: 18; height: 18
                     source: tItem.modelData.icon
+                    sourceSize.width: 36
+                    sourceSize.height: 36
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    asynchronous: true
                 }
             }
 
