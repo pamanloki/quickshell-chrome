@@ -322,6 +322,10 @@ PanelWindow {
                                     Text { text: "xbps (Void Linux)"; color: Theme.textDim; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSmall }
                                 }
                                 PillButton {
+                                    label: Updates.syncing ? "Syncing…" : "Sync"
+                                    onClicked: Updates.syncAndCheck()
+                                }
+                                PillButton {
                                     label: Updates.count > 0 ? "Update" : "Check"
                                     accent: Updates.count > 0
                                     onClicked: Updates.count > 0 ? Updates.update() : Updates.refresh()

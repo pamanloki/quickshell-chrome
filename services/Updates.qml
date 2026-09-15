@@ -14,6 +14,7 @@ Singleton {
     property int count: 0
     property bool checking: false
     property bool checked: false     // has a check completed at least once
+    property bool syncing: false
 
     function refresh() {
         checking = true;
@@ -27,6 +28,23 @@ Singleton {
             + "  command -v \"$t\" >/dev/null 2>&1 && exec \"$t\" -e sh -c \"$cmd\"; "
             + "done"]);
     }
+
+    // Sync the repo index (needs root, so it runs in a terminal), then re-check.
+    function syncAndCheck() {
+        syncing = true;
+        syncProc.command = ["sh", "-c",
+              "cmd='sudo xbps-install -S'; "
+            + "for t in $TERMINAL footx foot alacritty kitty wezterm xterm; do "
+            + "  command -v \"$t\" >/dev/null 2>&1 && exec \"$t\" -e sh -c \"$cmd\"; "
+            + "done"];
+        syncProc.running = true;
+    }
+
+    Process {
+        id: syncProc
+        onExited: { root.syncing = false; settle.restart(); }
+    }
+    Timer { id: settle; interval: 1500; onTriggered: root.refresh() }
 
     Component.onCompleted: refresh()
     Timer { interval: 1800000; running: true; repeat: true; onTriggered: root.refresh() }  // 30 min
