@@ -24,8 +24,25 @@ PanelWindow {
         bottom: true
     }
     implicitHeight: Theme.shelfHeight
-    exclusiveZone: Theme.shelfHeight
     color: "transparent"
+
+    // ── Auto-hide ────────────────────────────────────────────────────────────
+    readonly property bool autoHide: Prefs.shelfAutoHide
+    property bool hovered: false
+    property bool revealHover: false
+    readonly property bool shown: !autoHide || hovered || revealHover || ShellState.anyOpen
+
+    exclusiveZone: autoHide ? 0 : Theme.shelfHeight
+    mask: (autoHide && !shown) ? revealRegion : null
+
+    // Bottom-edge reveal strip (interactive even when the shelf is hidden).
+    Item {
+        id: revealStrip
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: 4
+        HoverHandler { onHoveredChanged: shelf.revealHover = hovered }
+    }
+    Region { id: revealRegion; item: revealStrip }
 
     // ── App / window helpers (matched by normalized appId) ──────────────────
     function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
@@ -73,6 +90,17 @@ PanelWindow {
         }
         return res;
     }
+
+    // ── Shelf body (slides down when auto-hidden) ───────────────────────────
+    Item {
+        id: body
+        anchors.fill: parent
+
+        transform: Translate {
+            y: shelf.shown ? 0 : shelf.height
+            Behavior on y { NumberAnimation { duration: Theme.durNormal; easing.type: Easing.OutCubic } }
+        }
+        HoverHandler { onHoveredChanged: shelf.hovered = hovered }
 
     // Shelf background
     Rectangle {
@@ -152,4 +180,5 @@ PanelWindow {
         anchors.rightMargin: Theme.gapLarge
         targetScreen: shelf.modelData
     }
+    }   // body
 }

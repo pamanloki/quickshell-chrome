@@ -16,6 +16,9 @@ Singleton {
     property bool notificationsOpen: false
     property bool settingsOpen: false
 
+    readonly property bool anyOpen: launcherOpen || quickSettingsOpen || calendarOpen
+        || notificationsOpen || settingsOpen || dockMenuOpen || trayMenuOpen
+
     // Dock right-click context menu.
     property bool dockMenuOpen: false
     property real dockMenuX: 0          // screen-x of the icon centre

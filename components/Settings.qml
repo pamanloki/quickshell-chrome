@@ -334,6 +334,42 @@ PanelWindow {
                             }
                         }
 
+                        SectionLabel { text: "Shelf" }
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 52
+                            radius: Theme.radius
+                            color: Theme.surfaceBright
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 12
+                                spacing: 12
+                                MaterialIcon { icon: "keyboard_double_arrow_down"; size: 22; color: Theme.text }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Auto-hide shelf"
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontBody
+                                    font.weight: Font.Medium
+                                }
+                                Rectangle {
+                                    width: 46; height: 26; radius: 13
+                                    color: Prefs.shelfAutoHide ? Theme.accent : Theme.surfaceHigh
+                                    Behavior on color { ColorAnimation { duration: Theme.durFast } }
+                                    Rectangle {
+                                        width: 20; height: 20; radius: 10
+                                        y: 3
+                                        x: Prefs.shelfAutoHide ? parent.width - width - 3 : 3
+                                        color: "#ffffff"
+                                        Behavior on x { NumberAnimation { duration: Theme.durFast; easing.type: Easing.OutCubic } }
+                                    }
+                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Prefs.toggleShelfAutoHide() }
+                                }
+                            }
+                        }
+
                         SectionLabel { text: "Power" }
                         RowLayout {
                             Layout.fillWidth: true
