@@ -12,10 +12,6 @@ import "root:/services"
  */
 PanelWindow {
     id: qs
-    required property var modelData
-    screen: modelData
-
-    visible: State.quickSettingsOpen && (State.activeScreen === null || State.activeScreen === modelData)
 
     WlrLayershell.namespace: "quickshell:quicksettings"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -32,7 +28,7 @@ PanelWindow {
     // Scrim / click-away
     MouseArea {
         anchors.fill: parent
-        onClicked: State.closeAll()
+        onPressed: State.closeAll()
     }
 
     Item {
@@ -43,7 +39,7 @@ PanelWindow {
 
     // ── The bubble ──────────────────────────────────────────────────────────
     Loader {
-        active: qs.visible
+        active: true
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: Theme.gapLarge

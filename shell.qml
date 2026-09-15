@@ -19,13 +19,9 @@ ShellRoot {
         Shelf {}
     }
 
+    // Launcher + quick settings, created on demand per screen.
     Variants {
         model: Quickshell.screens
-        QuickSettings {}
-    }
-
-    Variants {
-        model: Quickshell.screens
-        Launcher {}
+        OverlayHost {}
     }
 }

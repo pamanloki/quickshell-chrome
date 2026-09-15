@@ -12,14 +12,10 @@ import "root:/config"
  */
 PanelWindow {
     id: launcher
-    required property var modelData
-    screen: modelData
-
-    visible: State.launcherOpen && (State.activeScreen === null || State.activeScreen === modelData)
 
     WlrLayershell.namespace: "quickshell:launcher"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     anchors { top: true; left: true; right: true; bottom: true }
     exclusiveZone: 0
@@ -68,11 +64,18 @@ PanelWindow {
     }
     MouseArea {
         anchors.fill: parent
-        onClicked: State.closeAll()
+        onPressed: State.closeAll()
+    }
+
+    // Esc to close
+    Item {
+        anchors.fill: parent
+        focus: true
+        Keys.onEscapePressed: State.closeAll()
     }
 
     Loader {
-        active: launcher.visible
+        active: true
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.leftMargin: Theme.gapLarge
