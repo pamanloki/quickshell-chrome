@@ -18,6 +18,7 @@ Item {
     property bool focused: false
 
     signal activated()
+    signal rightClicked(real screenX)
 
     readonly property var entry: Apps.byId(appData?.id)
     readonly property string appName: entry?.name ?? appData?.name ?? appData?.id ?? "App"
@@ -43,11 +44,18 @@ Item {
             smooth: true
         }
 
-        // Hover highlight + click, no ripple (ChromeOS style).
+        // Hover highlight + left click, no ripple (ChromeOS style).
         StateLayer {
             radius: pill.radius
             enableRipple: false
             onClicked: root.activated()
+        }
+
+        // Right click → context menu (Add/Remove from Dock).
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: root.rightClicked(root.mapToItem(null, root.width / 2, 0).x)
         }
     }
 

@@ -27,46 +27,49 @@ PanelWindow {
     exclusiveZone: Theme.shelfHeight
     color: "transparent"
 
-    // ── Find a running window that belongs to a pinned app ──────────────────
-    function toplevelFor(app) {
-        const key = ((app.id || app.exec || "") + "").toLowerCase();
-        if (!key)
-            return null;
-        const short = key.split(".").pop();
+    // ── App / window helpers (matched by normalized appId) ──────────────────
+    function _norm(s) { return (s || "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+    function toplevelsOf(norm) {
         const list = ToplevelManager.toplevels?.values ?? [];
-        for (const t of list) {
-            const a = (t.appId || "").toLowerCase();
-            if (!a)
-                continue;
-            if (a === key || a === short || a.indexOf(short) !== -1 || key.indexOf(a) !== -1)
-                return t;
-        }
-        return null;
+        return list.filter(t => shelf._norm(t.appId) === norm);
     }
+    function isRunning(norm) { return toplevelsOf(norm).length > 0; }
+    function isFocused(norm) { return toplevelsOf(norm).some(t => t.activated); }
 
-    function launch(app) {
-        const running = toplevelFor(app);
-        if (running) {
-            if (running.activated)
-                return;       // already focused
-            running.activate();
+    // Focus a running app's next window (or the first).
+    function activateApp(norm) {
+        const ts = toplevelsOf(norm);
+        if (ts.length === 0)
             return;
-        }
-        Apps.exec(app);
+        const unfocused = ts.find(t => !t.activated);
+        (unfocused || ts[0]).activate();
     }
 
-    // Running windows that don't belong to any pinned app — shown as extra
-    // dock icons (ChromeOS/dock behaviour: pinned kept, running added).
+    // Launch a pinned app by id, or focus it if it's already running.
+    function launchOrFocus(appId) {
+        const n = _norm(appId);
+        if (isRunning(n)) { activateApp(n); return; }
+        const entry = Apps.byId(appId);
+        if (entry)
+            entry.execute();
+        else
+            Quickshell.execDetached(["sh", "-c", appId]);
+    }
+
+    // One entry per running app (deduped) that isn't pinned — extra dock icons.
     function runningUnpinned() {
         const list = ToplevelManager.toplevels?.values ?? [];
+        const seen = ({});
         const res = [];
         for (const t of list) {
-            let isPinned = false;
-            for (const app of Pinned.apps) {
-                if (toplevelFor(app) === t) { isPinned = true; break; }
-            }
-            if (!isPinned)
-                res.push(t);
+            const n = shelf._norm(t.appId);
+            if (!n || seen[n])
+                continue;
+            seen[n] = true;
+            if (DockConfig.isPinned(t.appId))
+                continue;
+            res.push({ appId: t.appId, norm: n });
         }
         return res;
     }
@@ -97,16 +100,17 @@ PanelWindow {
         anchors.centerIn: parent
         spacing: 4
 
-        // Pinned apps (kept), with a running dot when a window matches.
+        // Pinned apps (persisted), with a running dot when a window matches.
         Repeater {
-            model: Pinned.apps
+            model: DockConfig.pinned
             delegate: ShelfApp {
-                required property var modelData
-                appData: modelData
-                property var tl: shelf.toplevelFor(modelData)
-                running: tl !== null
-                focused: tl?.activated ?? false
-                onActivated: shelf.launch(modelData)
+                required property var modelData          // appId string
+                readonly property string norm: shelf._norm(modelData)
+                appData: ({ id: modelData, icon: modelData })
+                running: shelf.isRunning(norm)
+                focused: shelf.isFocused(norm)
+                onActivated: shelf.launchOrFocus(modelData)
+                onRightClicked: (x) => ShellState.openDockMenu(modelData, x, true, shelf.modelData)
             }
         }
 
@@ -118,22 +122,19 @@ PanelWindow {
             width: 1
             height: Theme.iconSize * 0.55
             color: Theme.outlineStrong
-            visible: shelf.runningUnpinned().length > 0
+            visible: DockConfig.pinned.length > 0 && shelf.runningUnpinned().length > 0
         }
 
-        // Running apps that aren't pinned.
+        // Running apps that aren't pinned (one icon per app).
         Repeater {
             model: shelf.runningUnpinned()
             delegate: ShelfApp {
-                required property var modelData   // a Toplevel
-                appData: ({
-                    id: modelData.appId,
-                    name: (modelData.title && modelData.title.length ? modelData.title : modelData.appId),
-                    icon: modelData.appId
-                })
+                required property var modelData          // { appId, norm }
+                appData: ({ id: modelData.appId, icon: modelData.appId })
                 running: true
-                focused: modelData.activated
-                onActivated: modelData.activate()
+                focused: shelf.isFocused(modelData.norm)
+                onActivated: shelf.activateApp(modelData.norm)
+                onRightClicked: (x) => ShellState.openDockMenu(modelData.appId, x, false, shelf.modelData)
             }
         }
     }

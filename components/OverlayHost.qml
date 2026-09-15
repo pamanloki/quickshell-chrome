@@ -23,4 +23,9 @@ Scope {
         active: ShellState.quickSettingsOpen && host.onThisScreen
         QuickSettings { screen: host.modelData }
     }
+
+    LazyLoader {
+        active: ShellState.dockMenuOpen && host.onThisScreen
+        DockMenu { screen: host.modelData }
+    }
 }

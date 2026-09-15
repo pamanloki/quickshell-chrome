@@ -79,30 +79,30 @@ Everything is plain QML — edit and it hot-reloads.
 | System integrations | `services/*.qml` |
 | Widgets | `components/*.qml` |
 
-**Pin your own apps** by editing the `apps` list in `config/Pinned.qml`. Each
-entry is a `.desktop` id (filename without `.desktop`); optional `exec` / `icon`
-/ `name` act as fallbacks for apps without a desktop file:
-
-```qml
-{ id: "org.mozilla.firefox", exec: "firefox", icon: "firefox", name: "Firefox" }
-```
+**Pin your own apps** straight from the shelf: **right-click** a running app's
+icon and choose *Add to Dock*, or right-click a pinned icon and choose *Remove
+from Dock*. The list is persisted to
+`$XDG_STATE_HOME/quickshell-chrome/dock_pinned.json` and starts empty. Left-click
+launches a pinned app (or focuses it if already running); running apps that
+aren't pinned appear after a divider with a running dot.
 
 ## Project layout
 
 ```
-shell.qml              # entry point — spawns a Shelf/QuickSettings/Launcher per screen
+shell.qml              # entry point — spawns a Shelf + OverlayHost per screen
 config/
   Theme.qml            # design tokens (Material 3 / Chrome OS palette)
-  State.qml            # shared UI state (which overlay is open)
-  Pinned.qml           # shelf app list
+  ShellState.qml       # shared UI state (which overlay is open, dock menu)
 services/
-  Time.qml Audio.qml Battery.qml
-  Brightness.qml Network.qml Bluetooth.qml Apps.qml
+  Time.qml Audio.qml Battery.qml Brightness.qml
+  Network.qml Bluetooth.qml Apps.qml DockConfig.qml   # persisted pinned apps
 components/
   Shelf.qml            # the bottom bar
   LauncherButton.qml StatusArea.qml ShelfApp.qml
+  OverlayHost.qml      # lazily creates the on-demand overlays per screen
   Launcher.qml         # fullscreen app search
   QuickSettings.qml    # system bubble
+  DockMenu.qml         # dock right-click Add/Remove from Dock
   QsToggle.qml QsSlider.qml QsIconButton.qml
   MaterialIcon.qml StateLayer.qml   # primitives
 ```

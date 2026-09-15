@@ -14,9 +14,24 @@ Singleton {
     property bool quickSettingsOpen: false
     property bool calendarOpen: false
 
+    // Dock right-click context menu.
+    property bool dockMenuOpen: false
+    property real dockMenuX: 0          // screen-x of the icon centre
+    property string dockMenuAppId: ""
+    property bool dockMenuPinned: false
+
     // Which screen the pointer / interaction last happened on. Used so popups
     // and the launcher show up on the active monitor only.
     property var activeScreen: null
+
+    function openDockMenu(appId, x, pinned, screen) {
+        closeAll();
+        dockMenuAppId = appId;
+        dockMenuX = x;
+        dockMenuPinned = pinned;
+        activeScreen = screen;
+        dockMenuOpen = true;
+    }
 
     function toggleLauncher() {
         const next = !launcherOpen;
@@ -40,5 +55,6 @@ Singleton {
         launcherOpen = false;
         quickSettingsOpen = false;
         calendarOpen = false;
+        dockMenuOpen = false;
     }
 }
