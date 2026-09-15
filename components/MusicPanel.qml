@@ -63,7 +63,9 @@ PanelWindow {
 
                     // Album art
                     Rectangle {
-                        width: 72; height: 72; radius: Theme.radius
+                        Layout.preferredWidth: 72
+                        Layout.preferredHeight: 72
+                        radius: Theme.radius
                         color: Theme.surfaceHigh
                         clip: true
                         Image {
@@ -108,8 +110,8 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: 4
+                    Layout.preferredHeight: 6
                     visible: Player.length > 0
-                    height: 6
                     radius: 3
                     color: Theme.surfaceHigh
                     Rectangle {

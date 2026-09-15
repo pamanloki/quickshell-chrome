@@ -15,6 +15,9 @@ Singleton {
     function lock() {
         Quickshell.execDetached(["sh", "-c",
             "command -v swaylock >/dev/null 2>&1 && exec swaylock -f; "
+            + "command -v gtklock  >/dev/null 2>&1 && exec gtklock -d; "
+            + "command -v waylock  >/dev/null 2>&1 && exec waylock; "
+            + "command -v hyprlock >/dev/null 2>&1 && exec hyprlock; "
             + "loginctl lock-session"]);
     }
 

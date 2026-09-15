@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import "root:/config"
@@ -45,9 +44,9 @@ PanelWindow {
 
         sourceComponent: Rectangle {
             id: bubble
-            width: 260
-            implicitHeight: content.implicitHeight + 2 * Theme.gapLarge
-            height: implicitHeight
+            width: 264
+            height: (power.pending ? confirmCol.implicitHeight : listCol.implicitHeight)
+                    + 2 * Theme.gapLarge
             radius: Theme.radiusLarge
             color: Theme.surfaceGlass
             border.width: 1
@@ -64,10 +63,9 @@ PanelWindow {
             MouseArea { anchors.fill: parent }
 
             // ── Action list ─────────────────────────────────────────────────
-            ColumnLayout {
-                id: content
-                anchors.fill: parent
-                anchors.margins: Theme.gapLarge
+            Column {
+                id: listCol
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: Theme.gapLarge }
                 spacing: 2
                 visible: power.pending === null
 
@@ -75,11 +73,12 @@ PanelWindow {
                     model: Power.actions
                     delegate: Rectangle {
                         required property var modelData
-                        Layout.fillWidth: true
+                        readonly property bool danger: modelData.id === "poweroff"
+                        width: listCol.width
                         height: 44
                         radius: Theme.radiusSmall
                         color: itemMa.containsMouse
-                            ? (modelData.id === "poweroff" ? Theme._a(Theme.bad, 0.15) : Theme.hover)
+                            ? (danger ? Theme._a(Theme.bad, 0.15) : Theme.hover)
                             : "transparent"
 
                         MaterialIcon {
@@ -89,14 +88,14 @@ PanelWindow {
                             anchors.verticalCenter: parent.verticalCenter
                             icon: modelData.icon
                             size: 20
-                            color: modelData.id === "poweroff" ? Theme.bad : Theme.text
+                            color: parent.danger ? Theme.bad : Theme.text
                         }
                         Text {
                             anchors.left: itemIcon.right
                             anchors.leftMargin: 12
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.label
-                            color: modelData.id === "poweroff" ? Theme.bad : Theme.text
+                            color: parent.danger ? Theme.bad : Theme.text
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontBody
                             font.weight: Font.Medium
@@ -113,20 +112,20 @@ PanelWindow {
             }
 
             // ── Confirmation ────────────────────────────────────────────────
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Theme.gapLarge
+            Column {
+                id: confirmCol
+                anchors { left: parent.left; right: parent.right; top: parent.top; margins: Theme.gapLarge }
                 spacing: Theme.gap
                 visible: power.pending !== null
 
                 MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
+                    anchors.horizontalCenter: parent.horizontalCenter
                     icon: power.pending ? power.pending.icon : "help"
                     size: 34
                     color: Theme.text
                 }
                 Text {
-                    Layout.fillWidth: true
+                    width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: power.pending ? (power.pending.label + " now?") : ""
                     color: Theme.text
@@ -135,13 +134,12 @@ PanelWindow {
                     font.weight: Font.Bold
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 4
+                Row {
+                    width: parent.width
                     spacing: Theme.gap
 
                     Rectangle {
-                        Layout.fillWidth: true
+                        width: (confirmCol.width - Theme.gap) / 2
                         height: 40
                         radius: Theme.radiusSmall
                         color: cancelMa.containsMouse ? Theme.surfaceHigh : Theme.surface
@@ -162,7 +160,7 @@ PanelWindow {
                         }
                     }
                     Rectangle {
-                        Layout.fillWidth: true
+                        width: (confirmCol.width - Theme.gap) / 2
                         height: 40
                         radius: Theme.radiusSmall
                         color: confirmMa.containsMouse ? Theme._a(Theme.bad, 0.85) : Theme.bad

@@ -73,8 +73,8 @@ PanelWindow {
                     }
                     Rectangle {
                         visible: Clipboard.entries.length > 0
-                        width: clearRow.implicitWidth + 16
-                        height: 28
+                        Layout.preferredWidth: clearRow.implicitWidth + 16
+                        Layout.preferredHeight: 28
                         radius: 14
                         color: clearMa.containsMouse ? Theme.hover : "transparent"
                         Row {

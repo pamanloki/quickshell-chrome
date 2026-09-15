@@ -70,7 +70,9 @@ PanelWindow {
                         font.weight: Font.Bold
                     }
                     Rectangle {
-                        width: 32; height: 32; radius: 16
+                        Layout.preferredWidth: 32
+                        Layout.preferredHeight: 32
+                        radius: 16
                         color: openMa.containsMouse ? Theme.hover : "transparent"
                         MaterialIcon { anchors.centerIn: parent; icon: "folder_open"; size: 18; color: Theme.text }
                         MouseArea {
