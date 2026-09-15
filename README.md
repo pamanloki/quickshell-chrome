@@ -28,11 +28,12 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 
 - **Quickshell** (recent build) running on Qt **6.7+**
 - A **wlroots**-based Wayland compositor (uses `wlr-layer-shell`)
-- Fonts:
-  - **Roboto** (UI text)
-  - **Material Symbols Rounded** (icons) — install the variable font, e.g.
-    the `ttf-material-symbols-variable` / `material-symbols` package, or drop
-    `MaterialSymbolsRounded.ttf` into `~/.local/share/fonts` and run `fc-cache -f`.
+- Font: **JetBrains Mono Nerd Font** — provides both the UI text *and* the icon
+  glyphs (icons use the Font Awesome glyph block bundled in every Nerd Font).
+  Install via your distro's `ttf-jetbrains-mono-nerd` package or from
+  [nerdfonts.com](https://www.nerdfonts.com/), then `fc-cache -f`. Verify with
+  `fc-list | grep -i jetbrains`. The family name is set in `config/Theme.qml`
+  (`fontFamily` / `iconFamily`); adjust it if fontconfig lists it differently.
 - Optional CLI tools (each feature degrades gracefully if missing):
   - `brightnessctl` — brightness slider
   - `nmcli` (NetworkManager) — network status & Wi-Fi toggle
@@ -89,6 +90,7 @@ entry is a `.desktop` id (filename without `.desktop`); optional `exec` / `icon`
 shell.qml              # entry point — spawns a Shelf/QuickSettings/Launcher per screen
 config/
   Theme.qml            # design tokens (Material 3 / Chrome OS palette)
+  Icons.qml            # semantic icon name -> Nerd Font glyph map
   State.qml            # shared UI state (which overlay is open)
   Pinned.qml           # shelf app list
 services/
@@ -105,7 +107,9 @@ components/
 
 ## Notes / troubleshooting
 
-- **Icons show as boxes** → the Material Symbols Rounded font isn't installed.
+- **Icons/text show as boxes** → JetBrains Mono Nerd Font isn't installed, or
+  fontconfig registers it under a different family name than `config/Theme.qml`
+  expects (check `fc-list | grep -i jetbrains`).
 - **Every icon is a blank tile** in the launcher → your icon theme is missing;
   set one with your DE tools or install e.g. `papirus-icon-theme`.
 - **Nothing appears** → make sure your compositor supports `wlr-layer-shell`

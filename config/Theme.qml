@@ -64,7 +64,9 @@ Singleton {
     readonly property var  easeEmphasized:  [0.05, 0.7, 0.1, 1.0, 1, 1]
 
     // ── Typography ───────────────────────────────────────────────────────────
-    readonly property string fontFamily: "Roboto"
+    // JetBrains Mono Nerd Font provides both the UI text and the icon glyphs.
+    readonly property string fontFamily: "JetBrainsMono Nerd Font"
+    readonly property string iconFamily: "JetBrainsMono Nerd Font"
     readonly property int fontSmall:  12
     readonly property int fontBody:   14
     readonly property int fontTitle:  16

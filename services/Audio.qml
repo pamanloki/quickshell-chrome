@@ -37,7 +37,7 @@ Singleton {
             source.audio.muted = !source.audio.muted;
     }
 
-    // Choose a speaker glyph based on level. Uses Material Symbols codepoints.
+    // Semantic speaker-icon name by level (resolved to a Nerd Font glyph).
     readonly property string icon: {
         if (muted || volume <= 0.001)
             return "volume_off";
