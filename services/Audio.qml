@@ -34,6 +34,23 @@ Singleton {
             Pipewire.preferredDefaultAudioSink = node;
     }
 
+    // Playback application streams (for the per-app mixer).
+    readonly property var streams: {
+        const ns = Pipewire.nodes?.values ?? [];
+        const out = [];
+        for (const n of ns)
+            if (n && n.isStream && n.audio && !n.isSink)
+                out.push(n);
+        return out;
+    }
+    function streamLabel(n) {
+        return n ? (n.description || n.name || "App") : "";
+    }
+    function setStreamVolume(n, v) {
+        if (n && n.audio)
+            n.audio.volume = Math.max(0, Math.min(1, v));
+    }
+
     readonly property real micVolume: source?.audio?.volume ?? 0
     readonly property bool micMuted: source?.audio?.muted ?? true
 
@@ -72,5 +89,9 @@ Singleton {
     // Track all output devices so their labels are available in the picker.
     PwObjectTracker {
         objects: root.sinks
+    }
+    // Track playback streams for the per-app mixer.
+    PwObjectTracker {
+        objects: root.streams
     }
 }

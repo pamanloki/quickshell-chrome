@@ -590,6 +590,66 @@ PanelWindow {
                     }
                 }
 
+                // Per-app volume mixer
+                Rectangle {
+                    Layout.fillWidth: true
+                    visible: qs.expanded === "audio" && Audio.streams.length > 0
+                    Layout.preferredHeight: visible ? Math.min(200, mixList.contentHeight + 8) : 0
+                    radius: Theme.radius
+                    color: Theme.surface
+                    clip: true
+
+                    ListView {
+                        id: mixList
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        model: Audio.streams
+                        spacing: 2
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        header: Item {
+                            width: mixList.width; height: 26
+                            Text {
+                                anchors.left: parent.left; anchors.leftMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: "App volumes"
+                                color: Theme.textDim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSmall
+                            }
+                        }
+
+                        delegate: Item {
+                            required property var modelData
+                            width: mixList.width
+                            height: 62
+                            Column {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 8
+                                spacing: 4
+                                Text {
+                                    width: parent.width
+                                    text: Audio.streamLabel(modelData)
+                                    color: Theme.text
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSmall
+                                    font.weight: Font.Medium
+                                    elide: Text.ElideRight
+                                }
+                                QsSlider {
+                                    width: parent.width
+                                    icon: "volume_up"
+                                    value: modelData.audio ? modelData.audio.volume : 0
+                                    onMoved: (v) => Audio.setStreamVolume(modelData, v)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.topMargin: 4
