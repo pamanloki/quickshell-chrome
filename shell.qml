@@ -37,4 +37,10 @@ ShellRoot {
         model: Quickshell.screens
         Osd {}
     }
+
+    // Rounded display corners (ChromeOS look).
+    Variants {
+        model: Quickshell.screens
+        ScreenCorners {}
+    }
 }

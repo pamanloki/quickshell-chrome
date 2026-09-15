@@ -84,6 +84,9 @@ Singleton {
     readonly property int shelfHeight: 64
     readonly property int iconSize:    44
 
+    // Rounded display corners (ChromeOS look). 0 disables.
+    readonly property int screenCornerRadius: 14
+
     // ── Motion ───────────────────────────────────────────────────────────────
     readonly property int durFast:   110
     readonly property int durNormal: 200

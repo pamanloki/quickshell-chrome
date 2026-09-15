@@ -184,9 +184,9 @@ PanelWindow {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Layout.rightMargin: 40   // clear the close (X) button
-                            Text { Layout.fillWidth: true; text: "Theme"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
-                            // light / dark switch
+                            spacing: 12
+                            Text { text: "Theme"; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: Theme.fontTitle; font.weight: Font.Bold }
+                            // light / dark switch, next to the title
                             Rectangle {
                                 width: modeRow.implicitWidth + 24
                                 height: 34
@@ -201,6 +201,7 @@ PanelWindow {
                                 }
                                 MouseArea { id: modeMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Flavours.toggleMode() }
                             }
+                            Item { Layout.fillWidth: true }   // spacer keeps them left, clear of the X
                         }
 
                         // search
