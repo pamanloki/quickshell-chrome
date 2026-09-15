@@ -35,7 +35,13 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   (xbps / Void), **About** system info, and power actions
 - **Base16 theming** — the whole palette is driven by a Base16 colors file and
   live-reloads, so `flavours apply <scheme>` re-themes the shell instantly
-- Material 3 motion — ripples, state layers, spring pop-in animations
+- **System tray** — StatusNotifierItem icons with real DBus menus
+- **Now Playing** — MPRIS media card (art, transport, seek) in quick settings
+- **Screen capture** — pod with a right-click menu: region/full × clipboard/file
+- **Caffeine** — keep-awake pod (systemd idle inhibitor)
+- **Frequent apps** — the launcher surfaces your most-used apps
+- **Workspace indicator** — niri workspace pips on the shelf
+- **Rounded display corners**, low-battery notifications, and Material 3 motion
 - Multi-monitor aware — a shelf per screen; popups open on the active screen only
 
 ## Requirements
@@ -53,13 +59,20 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
     Filled icons use the `FILL` axis, which needs Qt **6.7+**.
 - Optional CLI tools (each feature degrades gracefully if missing):
   - `brightnessctl` — brightness slider
-  - `nmcli` (NetworkManager) — network status & Wi-Fi toggle
-  - `bluetoothctl` (BlueZ) — bluetooth status & toggle
-  - `wlsunset` — Night Light
-  - PipeWire + WirePlumber — audio
+  - `nmcli` (NetworkManager) — network status, Wi-Fi list & toggle
+  - `bluetoothctl` (BlueZ) — bluetooth status, device list & toggle
+  - `wlsunset` (or `gammastep`) — Night Light
+  - `grim` + `slurp` + `wl-clipboard` — screen capture
+  - `swww` (or `swaybg`) — wallpaper setting
+  - `flavours` — Base16 theme switching
+  - `systemd` (`systemd-inhibit`, `loginctl`) — Caffeine & power actions
+  - `notify-send` (libnotify) — low-battery & screenshot notifications
+  - `niri` — workspace indicator (auto-detected via `NIRI_SOCKET`)
+  - PipeWire + WirePlumber — audio; any MPRIS player — Now Playing
 
-The battery, audio and system-tray data come from Quickshell's built-in
-services (UPower / PipeWire), so no extra polling scripts are needed.
+Battery, audio, notifications, media (MPRIS) and the system tray come from
+Quickshell's built-in services (UPower / PipeWire / NotificationServer /
+Mpris / SystemTray), so no extra polling scripts are needed.
 
 ## Install
 
