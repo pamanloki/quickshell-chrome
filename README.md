@@ -38,7 +38,6 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
 - **System tray** — StatusNotifierItem icons with real DBus menus
 - **Now Playing** — MPRIS media card (art, transport, seek) in quick settings
 - **Screen capture** — pod with a right-click menu: region/full × clipboard/file
-- **Caffeine** — keep-awake pod (systemd idle inhibitor)
 - **Frequent apps** — the launcher surfaces your most-used apps
 - **Workspace indicator** — niri workspace pips on the shelf
 - **Rounded display corners**, low-battery notifications, and Material 3 motion
@@ -65,8 +64,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - `grim` + `slurp` + `wl-clipboard` — screen capture
   - `swww` (or `swaybg`) — wallpaper setting
   - `flavours` — Base16 theme switching
-  - `systemd` (`systemd-inhibit`, `loginctl`) — Caffeine & power actions
-  - `notify-send` (libnotify) — low-battery & screenshot notifications
+  - `loginctl` / `systemctl` — power actions (lock, sleep, restart, off)
+  - [`fyi`](https://codeberg.org/dnkl/fyi) — low-battery & screenshot notifications
   - `niri` — workspace indicator (auto-detected via `NIRI_SOCKET`)
   - PipeWire + WirePlumber — audio; any MPRIS player — Now Playing
 

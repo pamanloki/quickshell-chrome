@@ -64,7 +64,7 @@ Singleton {
         }
     }
     function _notifyLow(urgency, title) {
-        Quickshell.execDetached(["notify-send", "-u", urgency, "-i", "battery-caution",
+        Quickshell.execDetached(["fyi", "-u", urgency, "-i", "battery-caution",
                                  title, percent + "% remaining"]);
     }
 }
