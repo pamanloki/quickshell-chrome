@@ -38,7 +38,8 @@ Singleton {
         command: ["sh", "-c",
             "cpu=$(head -n1 /proc/stat); "
             + "mem=$(awk '/^MemTotal:|^MemAvailable:/{printf \"%s \", $2}' /proc/meminfo); "
-            + "t=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0); "
+            + "t=$(sensors 2>/dev/null | grep -m1 'Package id 0' | grep -oE '[0-9]+\\.[0-9]+' | head -n1); "
+            + "[ -z \"$t\" ] && t=$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 0); "
             + "d=$(df -h --output=used,size,pcent / 2>/dev/null | tail -n1); "
             + "printf '%s|%s|%s|%s' \"$cpu\" \"$mem\" \"$t\" \"$d\""]
         stdout: StdioCollector { onStreamFinished: root._parse(text) }

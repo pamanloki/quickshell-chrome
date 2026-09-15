@@ -86,6 +86,8 @@ bubble with network / bluetooth toggles and brightness / volume sliders.
   - `wlsunset` (or `gammastep`) — Night Light
   - `grim` + `slurp` + `wl-clipboard` — screen capture
   - `wf-recorder` (+ `slurp`) — screen recording
+  - `lm_sensors` — CPU package temperature (`Package id 0`); falls back to
+    `/sys/class/thermal` if not installed
   - `cliphist` (+ `wl-clipboard`) — clipboard history; run a watcher, e.g.
     `spawn-at-startup "sh" "-c" "wl-paste --watch cliphist store"` in niri
   - `swww` (or `swaybg`) — wallpaper setting
