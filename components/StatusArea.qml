@@ -18,7 +18,7 @@ Item {
         id: pill
         anchors.fill: parent
         radius: Theme.radiusPill
-        color: State.quickSettingsOpen ? Theme.surfaceHigh : "transparent"
+        color: ShellState.quickSettingsOpen ? Theme.surfaceHigh : "transparent"
         implicitWidth: content.implicitWidth + 24
 
         Behavior on color { ColorAnimation { duration: Theme.durFast } }
@@ -78,8 +78,8 @@ Item {
         StateLayer {
             radius: pill.radius
             onClicked: {
-                State.activeScreen = root.targetScreen;
-                State.toggleQuickSettings();
+                ShellState.activeScreen = root.targetScreen;
+                ShellState.toggleQuickSettings();
             }
         }
     }

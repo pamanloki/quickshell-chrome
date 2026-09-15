@@ -55,6 +55,22 @@ PanelWindow {
         Apps.exec(app);
     }
 
+    // Running windows that don't belong to any pinned app — shown as extra
+    // dock icons (ChromeOS/dock behaviour: pinned kept, running added).
+    function runningUnpinned() {
+        const list = ToplevelManager.toplevels?.values ?? [];
+        const res = [];
+        for (const t of list) {
+            let isPinned = false;
+            for (const app of Pinned.apps) {
+                if (toplevelFor(app) === t) { isPinned = true; break; }
+            }
+            if (!isPinned)
+                res.push(t);
+        }
+        return res;
+    }
+
     // Shelf background
     Rectangle {
         anchors.fill: parent
@@ -76,11 +92,12 @@ PanelWindow {
         targetScreen: shelf.modelData
     }
 
-    // Pinned / running apps — centered
+    // Pinned + running apps — centered
     RowLayout {
         anchors.centerIn: parent
         spacing: 4
 
+        // Pinned apps (kept), with a running dot when a window matches.
         Repeater {
             model: Pinned.apps
             delegate: ShelfApp {
@@ -90,6 +107,33 @@ PanelWindow {
                 running: tl !== null
                 focused: tl?.activated ?? false
                 onActivated: shelf.launch(modelData)
+            }
+        }
+
+        // Divider between pinned and running-only apps.
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: 2
+            Layout.rightMargin: 2
+            width: 1
+            height: Theme.iconSize * 0.55
+            color: Theme.outlineStrong
+            visible: shelf.runningUnpinned().length > 0
+        }
+
+        // Running apps that aren't pinned.
+        Repeater {
+            model: shelf.runningUnpinned()
+            delegate: ShelfApp {
+                required property var modelData   // a Toplevel
+                appData: ({
+                    id: modelData.appId,
+                    name: (modelData.title && modelData.title.length ? modelData.title : modelData.appId),
+                    icon: modelData.appId
+                })
+                running: true
+                focused: modelData.activated
+                onActivated: modelData.activate()
             }
         }
     }

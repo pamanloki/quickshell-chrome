@@ -12,15 +12,15 @@ Scope {
     required property var modelData
 
     readonly property bool onThisScreen:
-        State.activeScreen === null || State.activeScreen === modelData
+        ShellState.activeScreen === null || ShellState.activeScreen === modelData
 
     LazyLoader {
-        active: State.launcherOpen && host.onThisScreen
+        active: ShellState.launcherOpen && host.onThisScreen
         Launcher { screen: host.modelData }
     }
 
     LazyLoader {
-        active: State.quickSettingsOpen && host.onThisScreen
+        active: ShellState.quickSettingsOpen && host.onThisScreen
         QuickSettings { screen: host.modelData }
     }
 }

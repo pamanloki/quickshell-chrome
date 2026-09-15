@@ -5,9 +5,10 @@ import "root:/config"
 import "root:/services"
 
 /**
- * A single pinned app tile on the shelf: rounded icon, hover pill, running
- * indicator dot underneath, and a tooltip. `appData` is one entry from the
- * Pinned config; `running` and `focused` come from the shelf's toplevel match.
+ * A single app tile on the shelf: rounded icon with a hover pill, a running
+ * indicator dot underneath and a tooltip. Pure ChromeOS look — no magnify,
+ * bounce or scale animations, just a hover highlight. `appData` is {id,name,
+ * icon}; `running`/`focused` come from the shelf's toplevel match.
  */
 Item {
     id: root
@@ -42,24 +43,24 @@ Item {
             smooth: true
         }
 
+        // Hover highlight + click, no ripple (ChromeOS style).
         StateLayer {
             radius: pill.radius
+            enableRipple: false
             onClicked: root.activated()
         }
     }
 
-    // Running indicator (ChromeOS shows a short bar/dot below the icon)
+    // Running indicator dot (no animation).
     Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: -2
-        width: root.focused ? 16 : 6
+        anchors.bottomMargin: -1
+        width: root.focused ? 14 : 5
         height: 3
-        radius: 2
+        radius: 1.5
         visible: root.running
         color: root.focused ? Theme.accent : Theme.textDim
-        Behavior on width { NumberAnimation { duration: Theme.durNormal; easing.type: Easing.OutCubic } }
-        Behavior on color { ColorAnimation { duration: Theme.durNormal } }
     }
 
     // Tooltip

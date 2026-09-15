@@ -11,7 +11,7 @@ Item {
     implicitHeight: Theme.iconSize
 
     property var targetScreen: null
-    readonly property bool active: State.launcherOpen
+    readonly property bool active: ShellState.launcherOpen
 
     Rectangle {
         id: circle
@@ -19,11 +19,9 @@ Item {
         width: 34
         height: 34
         radius: width / 2
-        color: root.active ? Theme.accent : "#f1f3f4"
-        scale: press.pressed ? 0.9 : (hover.hovered ? 1.06 : 1.0)
-
-        Behavior on color { ColorAnimation { duration: Theme.durFast } }
-        Behavior on scale { NumberAnimation { duration: Theme.durFast; easing.type: Easing.OutCubic } }
+        // No scale/bounce animation — just a hover highlight (ChromeOS style).
+        color: root.active ? Theme.accent
+                           : (hover.hovered ? "#ffffff" : "#f1f3f4")
 
         // Central Google-blue dot
         Rectangle {
@@ -32,7 +30,6 @@ Item {
             height: 12
             radius: width / 2
             color: root.active ? "#ffffff" : Theme.accent
-            Behavior on color { ColorAnimation { duration: Theme.durFast } }
         }
     }
 
@@ -40,8 +37,8 @@ Item {
     TapHandler {
         id: press
         onTapped: {
-            State.activeScreen = root.targetScreen;
-            State.toggleLauncher();
+            ShellState.activeScreen = root.targetScreen;
+            ShellState.toggleLauncher();
         }
     }
 }

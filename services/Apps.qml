@@ -11,10 +11,15 @@ Singleton {
         if (!id)
             return null;
         try {
-            return DesktopEntries.byId(id) ?? null;
-        } catch (e) {
-            return null;
-        }
+            const e = DesktopEntries.byId(id);
+            if (e)
+                return e;
+        } catch (e) {}
+        // Fall back to a fuzzy match (handles appIds that aren't exact ids).
+        try {
+            return DesktopEntries.heuristicLookup(id) ?? null;
+        } catch (e) {}
+        return null;
     }
 
     function exec(app) {

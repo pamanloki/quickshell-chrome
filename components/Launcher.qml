@@ -53,7 +53,7 @@ PanelWindow {
 
     function launch(entry) {
         if (!entry) return;
-        State.closeAll();
+        ShellState.closeAll();
         entry.execute();
     }
 
@@ -64,14 +64,14 @@ PanelWindow {
     }
     MouseArea {
         anchors.fill: parent
-        onPressed: State.closeAll()
+        onPressed: ShellState.closeAll()
     }
 
     // Esc to close
     Item {
         anchors.fill: parent
         focus: true
-        Keys.onEscapePressed: State.closeAll()
+        Keys.onEscapePressed: ShellState.closeAll()
     }
 
     Loader {
@@ -143,7 +143,7 @@ PanelWindow {
                             selectionColor: Theme.accent
 
                             onTextChanged: launcher.query = text
-                            Keys.onEscapePressed: State.closeAll()
+                            Keys.onEscapePressed: ShellState.closeAll()
                             Keys.onReturnPressed: {
                                 const r = launcher.results();
                                 if (r.length > 0) launcher.launch(r[0]);

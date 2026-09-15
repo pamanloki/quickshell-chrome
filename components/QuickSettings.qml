@@ -28,13 +28,13 @@ PanelWindow {
     // Scrim / click-away
     MouseArea {
         anchors.fill: parent
-        onPressed: State.closeAll()
+        onPressed: ShellState.closeAll()
     }
 
     Item {
         anchors.fill: parent
         focus: true
-        Keys.onEscapePressed: State.closeAll()
+        Keys.onEscapePressed: ShellState.closeAll()
     }
 
     // ── The bubble ──────────────────────────────────────────────────────────
@@ -182,16 +182,16 @@ PanelWindow {
 
                     QsIconButton {
                         icon: "settings"
-                        onClicked: { State.closeAll(); Quickshell.execDetached(["sh", "-c", "gnome-control-center || xdg-open settings || systemsettings"]); }
+                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "gnome-control-center || xdg-open settings || systemsettings"]); }
                     }
                     QsIconButton {
                         icon: "lock"
-                        onClicked: { State.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); }
+                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "loginctl lock-session"]); }
                     }
                     QsIconButton {
                         icon: "power_settings_new"
                         iconColor: Theme.bad
-                        onClicked: { State.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl poweroff"]); }
+                        onClicked: { ShellState.closeAll(); Quickshell.execDetached(["sh", "-c", "systemctl poweroff"]); }
                     }
                 }
             }
